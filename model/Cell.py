@@ -2,18 +2,7 @@ class Cell:
 
     current_state = 0
     next_state = 0
-    '''
-    neighbourhood indexes
-    Moore:
-        1
-    0   x   3
-        2
-        
-    Von Neumann:
-    0   3   5
-    1   x   6
-    2   4   7
-    '''
+    value = 0
     neighbours = list()
     blocked = False
 
@@ -25,11 +14,10 @@ class Cell:
     def clear(self):
         self.current_state = 0
         self.next_state = 0
+        self.value = 0
         self.blocked = False
 
     def calculate_state(self):
-
-    def move(self):
 
     def neighbours_add(self, cell):
         self.neighbours.append(cell)
