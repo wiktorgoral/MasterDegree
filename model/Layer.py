@@ -50,12 +50,16 @@ class Layer:
             for y in range(self.size):
                 self.cells[x][y].calculate_state()
 
-    # Function that changes state for each state
+    # Function that changes state for each cell
     def change_state(self):
         for x in range(self.size):
             for y in range(self.size):
                 self.cells[x][y].current_state = self.cells[x][y].next_state
                 self.cells[x][y].next_state = self.cells_states[0][0]
+
+    # Function that changes cell
+    def change_cell(self, cell, x, y):
+        self.cells[x][y] = cell
 
     # Function that prints cell's state
     def print_cell_state(self, x, y):

@@ -4,7 +4,6 @@ class Cell:
     next_state = 0
     value = 0
     neighbours = list()
-    blocked = False
 
     def __init__(self, state=0, neighbours=None, blocked=True):
         self.current_state = state
@@ -26,9 +25,9 @@ class Cell:
         value = 0
         for i in range(self.neighbours):
             if self.neighbours[i]== 1: value+=1
-        if self.state == 1 and value in [2,3]:
-            next_state = 1
-        if self.state == 0 and value == 3:
-            next_state = 1
-        else: next_state == 0
+        if self.current_state == 1 and value in [2,3]:
+            self.next_state = 1
+        if self.current_state == 0 and value == 3:
+            self.next_state = 1
+        else: self.next_state = 0
 

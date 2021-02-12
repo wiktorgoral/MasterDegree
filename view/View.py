@@ -41,12 +41,14 @@ class Board:
 
         # Initializing canvas
         self.draw_netting()
+        self.draw_layer("env")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
         self.listbox_layer = Listbox(self.tooltip, font=('Times', 14), width=5, height=5)
         for i in range(layers):
             self.listbox_layer.insert(i + 1, layers[i].name)
+        self.listbox_layer.insert(len(layers), "Result")
         self.listbox_layer.activate(self.current_layer)
 
         # Declaring types of cells in layer list selection
@@ -103,12 +105,18 @@ class Board:
                                     self.size * self.tile_size, (i + 1) * self.tile_size)
 
     # Function that colors appropriate cell in grid
-    def fill_cell(self, grid_position, color):
+    def fill_cell(self, grid_position, color, tag=""):
         pixel_position = self.grid_to_pixel(grid_position)
         self.canvas.create_rectangle(
             pixel_position[0], pixel_position[1],
             pixel_position[0] + self.tile_size, pixel_position[1] + self.tile_size,
-            fill=color, tag="rectangle")
+            fill=color, tag=tag)
+
+    # Todo change to draw input layer
+    def draw_layer(self, tag):
+        for x in range(self.size):
+            for y in range(self.size):
+                self.fill_cell([x, y], self.cell_types[self.board_status[x][y]][1], tag)
 
     '''Logic Functions'''
 
@@ -125,13 +133,21 @@ class Board:
     def change_layer(self, layer):
         self.click_stop()
         self.board_status = layer.cells
-        self.current_type = layer.cells_states
-        self.canvas.delete("rectangle")
-        for x in range(self.size):
-            for y in range(self.size):
-                self.fill_cell([x, y], self.current_type[self.board_status[x][y]][1])
+        self.change_types(layer)
+        self.canvas.delete("new")
+        self.draw_layer("new")
+
+    def change_types(self, layer):
+        self.listbox_cell.delete(0, len(self.cell_types))
+        self.cell_types = layer.cells_states
+        for i in range(self.cell_types):
+            self.listbox_cell.insert(i + 1, self.cell_types[i][0])
+            self.listbox_cell.itemconfig(i + 1, {'bg': self.cell_types[i][1]})
+        self.current_type = 0
+        self.listbox_cell.activate(self.current_type)
 
     '''Mouse Events Functions'''
+
     # Todo add controller 
     # On-Click/Mouse-Down function to change cell type
     def click_canvas(self, event):
@@ -140,7 +156,7 @@ class Board:
         grid_position = self.pixel_to_grid(pixel_position)
 
         # Fill rectangle with appropriate color and change cell's board status
-        self.fill_cell(grid_position, self.cell_types[self.current_layer][self.current_type][0])
+        self.fill_cell(grid_position, self.cell_types[self.current_type][0], "new")
         self.board_status[grid_position[0]][grid_position[1]] = self.current_type
 
     # On-Click function that tracks currently selected cell type
@@ -151,7 +167,14 @@ class Board:
     # Todo add controller instead for storing all layers
     def click_layer(self):
         self.current_layer = self.listbox_layer.curselection()[0]
-        self.change_layer(self.layers[self.current_layer])
+        if self.current_layer == len(self.layers):
+            for layer in self.layers:
+                self.draw_layer(layer, "new")
+            self.listbox_cell.delete(0, len(self.cell_types))
+            self.cell_types = []
+            self.current_type = 0
+        else:
+            self.change_layer(self.layers[self.current_layer])
 
     # On-Click function that resets current layer
     def click_clear(self):
