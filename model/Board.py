@@ -1,17 +1,21 @@
 from model.Layer import Layer
 
 
-class Board:
+class ModelBoard:
+
     layers_count = 0
     layers = []
     layer_size = 0
     result = None
 
-    def __init__(self, layers_count=3, layer_size=100, layers=None):
-        self.layers_count = layers_count
-        self.layer_size = layer_size
+    def __init__(self, layers=None):
+        size = layers[0].size
+        for layer in layers:
+            if layer.size != size:
+                raise Exception("Layers not same size")
+        self.layers_count = len(layers)
+        self.layer_size = size
         self.layers = layers
-        self.layers.append()
 
     # Iteration step
     def step(self):
@@ -64,8 +68,8 @@ class Board:
                     self.conflict(x, y)
 
     # Function that adds layer
-    def add_layer(self, layer):
-        if isinstance(layer, Layer):
-            self.layers.append(layer)
+    def add_layer(self, layer: Layer):
+        if layer.size != self.layer_size:
+            raise Exception("Layers not same size")
         else:
-            raise Exception("Object is not layer")
+            self.layers.append(layer)

@@ -1,4 +1,3 @@
-from enum import Enum
 from model.Cell import Cell
 
 
