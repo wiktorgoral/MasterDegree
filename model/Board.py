@@ -1,3 +1,5 @@
+from typing import List
+
 from model.Layer import Layer
 
 
@@ -8,7 +10,7 @@ class ModelBoard:
     layer_size = 0
     result = None
 
-    def __init__(self, layers=None):
+    def __init__(self, layers: List[Layer]):
         size = layers[0].size
         for layer in layers:
             if layer.size != size:
@@ -29,7 +31,7 @@ class ModelBoard:
             layer.change_state()
 
     # Function that clears one layer
-    def clear(self, i):
+    def clear(self, i: int):
         self.layers[i].reset()
 
     # Function that clears all layers
@@ -43,7 +45,7 @@ class ModelBoard:
             layer.calculate_state()
 
     # Function that checks if cells of coordinates [x y] are occupied
-    def occupied(self, x, y):
+    def occupied(self, x: int, y: int):
         occupied = False
         for layer in self.layers:
             if layer.cells[x][y] == 0:
@@ -55,7 +57,7 @@ class ModelBoard:
         return False
 
     # Function that resolves conflict and changes cells accordingly
-    def conflict(self, x, y):
+    def conflict(self, x: int, y: int):
         types = []
         for layer in self.layers:
             types.append(layer.cells[x][y])

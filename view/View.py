@@ -1,5 +1,6 @@
 from tkinter import *
 import numpy as np
+from typing import List
 
 from controller.ViewController import ViewController
 
@@ -10,13 +11,13 @@ class ViewBoard:
     size = 0
     layers_count = 0
     tile_size = 0
-    board_status = []
+    board_status = np.zeros(1, dtype=str)
     cell_types = []
     current_type = 0
     current_layer = 0
     start = False
 
-    def __init__(self, controller: ViewController, tile_size=10):
+    def __init__(self, controller: ViewController, tile_size: int = 10):
 
         self.controller = controller
         self.size = controller.get_size()
@@ -49,7 +50,7 @@ class ViewBoard:
         self.draw_netting()
         for x in range(self.size):
             for y in range(self.size):
-                self.fill_cell([x, y], self.cell_types[self.board_status[x][y]][1], "env")
+                self.fill_cell([x, y], self.board_status[x][y], "env")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
@@ -116,18 +117,18 @@ class ViewBoard:
                                     self.size * self.tile_size, (i + 1) * self.tile_size)
 
     # Function that colors appropriate cell in grid
-    def fill_cell(self, grid_position, color, tag=""):
+    def fill_cell(self, grid_position, color: str, tag: str):
         pixel_position = self.grid_to_pixel(grid_position)
         self.canvas.create_rectangle(
             pixel_position[0], pixel_position[1],
             pixel_position[0] + self.tile_size, pixel_position[1] + self.tile_size,
             fill=color, tag=tag)
 
-    def draw_layer(self, tag):
+    def draw_layer(self, tag: str):
         for x in range(self.size):
             for y in range(self.size):
-                if self.board_status[x][y] == 0: continue
-                self.fill_cell([x, y], self.cell_types[self.board_status[x][y]][1], tag)
+                if self.board_status[x][y] == "white": continue
+                self.fill_cell([x, y], self.board_status[x][y], tag)
 
     '''Logic Functions'''
 
@@ -141,17 +142,17 @@ class ViewBoard:
         grid_position = np.array(grid_position, dtype=int)
         return self.tile_size * grid_position
 
-    def change_layer(self, layer):
+    def change_layer(self, layer: int):
         self.click_stop()
         self.board_status = self.controller.layer_to_view(layer)
         self.change_types(self.controller.types_to_view(layer))
         self.canvas.delete("new")
         self.draw_layer("new")
 
-    def change_types(self, layer):
+    def change_types(self, types: List[tuple]):
         self.listbox_cell.delete(0, len(self.cell_types))
-        self.cell_types = layer.cells_states
-        for i in range(self.cell_types):
+        self.cell_types = types
+        for i in range(len(self.cell_types)):
             self.listbox_cell.insert(i + 1, self.cell_types[i][0])
             self.listbox_cell.itemconfig(i + 1, {'bg': self.cell_types[i][1]})
         self.current_type = 0
@@ -169,8 +170,8 @@ class ViewBoard:
         grid_position = self.pixel_to_grid(pixel_position)
 
         # Fill rectangle with appropriate color and change cell's board status
-        self.fill_cell(grid_position, self.cell_types[self.current_type][0], "new")
-        self.board_status[grid_position[0]][grid_position[1]] = self.current_type
+        self.fill_cell(grid_position, self.cell_types[self.current_type][1], "new")
+        self.board_status[grid_position[0]][grid_position[1]] = self.cell_types[self.current_type][1]
 
         self.controller.cell_to_model(grid_position, self.current_type, self.current_layer)
 
@@ -183,9 +184,7 @@ class ViewBoard:
     def click_layer(self):
         self.current_layer = self.listbox_layer.curselection()[0]
         if self.current_layer == self.layers_count:
-            for i in range(1, self.layers_count):
-                self.controller.layer_to_view(i)
-                self.draw_layer("new")
+            result = self.controller.result_to_view()
             self.listbox_cell.delete(0, len(self.cell_types))
             self.cell_types = []
             self.current_type = 0
@@ -196,8 +195,7 @@ class ViewBoard:
 
     # On-Click function that resets current layer
     def click_clear(self):
-        self.board_status = np.zeros(shape=self.size)
-        self.cell_types = []
+        self.board_status = np.zeros(shape=self.size, dtype=str)
         self.controller.clear(self.current_layer)
 
     # On-Click function that resets whole simulation
