@@ -11,10 +11,9 @@ class ViewBoard:
     size = 0
     layers_count = 0
     tile_size = 0
-    board_status = np.zeros(1, dtype=str)
-    cell_types = []
+    current_layer = None
     current_type = 0
-    current_layer = 0
+    current_layer_index = 0
     start = False
 
     def __init__(self, controller: ViewController, tile_size: int = 10):
@@ -24,9 +23,9 @@ class ViewBoard:
         self.tile_size = tile_size
         size_pixel = self.size * self.tile_size
 
-        self.current_layer = 0
-        self.board_status = controller.layer_to_view(self.current_layer)
-        self.cell_types = controller.types_to_view(self.current_layer)
+        self.current_layer_index = 0
+        self.current_layer = controller.layer_to_view(self.current_layer_index)
+        self.cell_types = self.current_layer.cells_states
         self.start = False
 
         # Declaring window
@@ -50,7 +49,7 @@ class ViewBoard:
         self.draw_netting()
         for x in range(self.size):
             for y in range(self.size):
-                self.fill_cell([x, y], self.board_status[x][y], "env")
+                self.fill_cell([x, y], self.current_layer.cells[x][y], "env")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
@@ -60,7 +59,7 @@ class ViewBoard:
         for i in range(layers_names):
             self.listbox_layer.insert(i + 1, layers_names[i])
         self.listbox_layer.insert(len(layers_names), "Result")
-        self.listbox_layer.activate(self.current_layer)
+        self.listbox_layer.activate(self.current_layer_index)
 
         # Declaring types of cells in layer list selection
         listbox_cell_label = Label(self.tooltip, text="Available cell types:")
@@ -127,8 +126,8 @@ class ViewBoard:
     def draw_layer(self, tag: str):
         for x in range(self.size):
             for y in range(self.size):
-                if self.board_status[x][y] == "white": continue
-                self.fill_cell([x, y], self.board_status[x][y], tag)
+                if self.current_layer.cells[x][y] == "white": continue
+                self.fill_cell([x, y], self.current_layer.cells[x][y], tag)
 
     '''Logic Functions'''
 
@@ -144,8 +143,8 @@ class ViewBoard:
 
     def change_layer(self, layer: int):
         self.click_stop()
-        self.board_status = self.controller.layer_to_view(layer)
-        self.change_types(self.controller.types_to_view(layer))
+        self.current_layer = self.controller.layer_to_view(layer)
+        self.change_types(self.current_layer.cells_states)
         self.canvas.delete("new")
         self.draw_layer("new")
 
@@ -160,7 +159,6 @@ class ViewBoard:
 
     '''Mouse Events Functions'''
 
-    # Todo add controller 
     # On-Click/Mouse-Down function to change cell type
     def click_canvas(self, event):
         if self.start:
@@ -171,37 +169,39 @@ class ViewBoard:
 
         # Fill rectangle with appropriate color and change cell's board status
         self.fill_cell(grid_position, self.cell_types[self.current_type][1], "new")
-        self.board_status[grid_position[0]][grid_position[1]] = self.cell_types[self.current_type][1]
+        self.current_layer.cells[grid_position[0]][grid_position[1]] = self.cell_types[self.current_type][1]
 
-        self.controller.cell_to_model(grid_position, self.current_type, self.current_layer)
+        self.controller.cell_to_model(grid_position, self.current_type, self.current_layer_index)
 
     # On-Click function that tracks currently selected cell type
     def click_type(self):
         self.current_type = self.listbox_cell.curselection()[0]
 
     # On-Click function that tracks currently selected layer
-    # Todo dont draw 0 type cells for layers other than env
+    # Todo add result layer
     def click_layer(self):
-        self.current_layer = self.listbox_layer.curselection()[0]
-        if self.current_layer == self.layers_count:
+        self.current_layer_index = self.listbox_layer.curselection()[0]
+        if self.current_layer_index == self.layers_count:
             result = self.controller.result_to_view()
             self.listbox_cell.delete(0, len(self.cell_types))
             self.cell_types = []
             self.current_type = 0
-        elif self.current_layer == 0:
+        elif self.current_layer_index == 0:
             self.canvas.delete("new")
         else:
-            self.change_layer(self.current_layer)
+            self.change_layer(self.current_layer_index)
 
     # On-Click function that resets current layer
     def click_clear(self):
-        self.board_status = np.zeros(shape=self.size, dtype=str)
-        self.controller.clear(self.current_layer)
+        self.start = False
+        self.controller.clear(self.current_layer_index)
+        self.change_layer(self.current_layer_index)
 
     # On-Click function that resets whole simulation
     # Todo add layers clear with controller
     def click_reset(self):
-        self.click_clear()
+        self.start = False
+        self.controller.reset()
 
     # On-Click function that starts simulation
     def click_start(self):

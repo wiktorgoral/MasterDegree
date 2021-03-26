@@ -5,7 +5,8 @@ class Cell:
     value = 0
     neighbours = []
 
-    def __init__(self, state: int = 0, neighbours: list = None, blocked: bool = True):
+    def __init__(self, state: int, neighbours: list, blocked: bool, **value):
+        self.value = value.get("value")
         self.current_state = state
         self.neighbours = neighbours
         self.blocked = blocked
@@ -17,6 +18,7 @@ class Cell:
         self.blocked = False
 
     def calculate_state(self):
+        return 1
 
     def neighbours_add(self, cell):
         self.neighbours.append(cell)
@@ -24,7 +26,7 @@ class Cell:
     def life_example(self):
         value = 0
         for i in range(len(self.neighbours)):
-            if self.neighbours[i]== 1: value+=1
+            if self.neighbours[i] == 1: value+=1
         if self.current_state == 1 and value in [2,3]:
             self.next_state = 1
         if self.current_state == 0 and value == 3:

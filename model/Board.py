@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 
 from model.Layer import Layer
@@ -9,6 +10,7 @@ class ModelBoard:
     layers = []
     layer_size = 0
     result = None
+    start_copy = None
 
     def __init__(self, layers: List[Layer]):
         size = layers[0].size
@@ -18,6 +20,7 @@ class ModelBoard:
         self.layers_count = len(layers)
         self.layer_size = size
         self.layers = layers
+        self.start_copy = deepcopy(self.layers)
 
     # Iteration step
     def step(self):
@@ -36,8 +39,7 @@ class ModelBoard:
 
     # Function that clears all layers
     def reset(self):
-        for layer in self.layers:
-            layer.reset()
+        self.layers = deepcopy(self.start_copy)
 
     # Function that calculates states of all layers
     def calculate_state(self):

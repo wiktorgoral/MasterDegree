@@ -1,5 +1,6 @@
+from copy import deepcopy
+
 from model.Cell import Cell
-import numpy as np
 
 
 class Layer:
@@ -7,14 +8,14 @@ class Layer:
     # Length of array
     size = 0
     # 2D array of Cell
-    cells = np.zeros(1, dtype=Cell)
+    cells = [[Cell(0, [], False) for x in range(2)] for y in range(2)]
     # Array of tuples (state's name, state's color)
-    cells_states = [("nothing", "white")]
+    cells_states = []
 
     def __init__(self, name: str, size: int, neighbour: str, cell_states: list):
         self.name = name
         self.size = size
-        self.cells = np.zeros((size, size), dtype=Cell)
+        self.cells = [[Cell(0, [], False) for x in range(size)] for y in range(size)]
         self.cells_states.extend(cell_states)
         self.add_neighbourhood(neighbour)
 
@@ -38,11 +39,14 @@ class Layer:
     def clear(self, x: int, y: int):
         self.cells[x][y].clear()
 
-    # Function that clears all cells
-    def reset(self):
+    def clear_all(self):
         for x in range(self.size):
             for y in range(self.size):
                 self.clear(x, y)
+
+    # Function that clears all cells
+    def reset(self, layer):
+        self.layer = deepcopy(layer.cells)
 
     # Function that calculates state for each cell
     def calculate_state(self):

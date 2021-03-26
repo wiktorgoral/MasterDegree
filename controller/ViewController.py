@@ -7,9 +7,9 @@ import copy
 
 class ViewController:
 
+    # model
     board = None
-    # copy of initial state for reset function
-    board_copy = None
+    # View
     view = None
 
     def __init__(self, board: ModelBoard, size: int):
@@ -30,16 +30,7 @@ class ViewController:
 
     # return layer's cells
     def layer_to_view(self, i: int):
-        layer = self.board.layers[i]
-        result = np.zeros((layer.size, layer.size), dtype=str)
-        for x in range(layer.size):
-            for y in range(layer.size):
-                result[x][y] = layer.cells_states[layer.cells[x][y]][1]
-        return result
-
-    # return layers cell types
-    def types_to_view(self, i: int):
-        return self.board.layers[i].cells_states
+        return self.board.layers[i]
 
     # return all layers cells
     def result_to_view(self):
@@ -53,15 +44,17 @@ class ViewController:
 
     # change cell from model to same in view
     def cell_to_model(self, position, cell_type: int, layer: int):
-        self.board.layers[layer].change_cell(position[0], position[1], cell_type)
+        self.board.layers[layer].change_cell_state(position[0], position[1], cell_type)
 
     # clear layer of cells
     def clear(self, i: int):
-        self.board.layers[i].clear()
+        self.board.layers[i].clear_all()
 
     # Todo implement it
     def reset(self):
-        self.board = self.board_copy
+        self.board.reset()
+        self.layer_to_view(self.view.current_layer)
+
 
     def iteration(self):
 
