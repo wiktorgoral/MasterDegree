@@ -1,4 +1,8 @@
+import copy
+import os
+
 from model.Layer import Layer
+from model.Board import ModelBoard
 
 
 def read_layer(name):
@@ -7,7 +11,7 @@ def read_layer(name):
         name = reader.readline().rstrip('\n')
         size = int(reader.readline().rstrip('\n'))
         cells = [[0 for x in range(size)] for y in range(size)]
-        cells_states = list()
+        cells_states = []
         neighbourhood = reader.readline().rstrip('\n')
 
         # read cells
@@ -32,7 +36,6 @@ def read_layer(name):
         values = list()
         while line != "":
             line = line.rstrip('\n')
-            print(line)
             values.append(float(line))
             line = reader.readline()
 
@@ -49,3 +52,10 @@ def read_layer(name):
         return layer
 
 
+def read_board(folder: str):
+    layers = list()
+    number_of_files = next(os.walk(folder))[2]
+    for file in number_of_files:
+        layer = read_layer(os.path.join(folder, file))
+        layers.append(layer)
+    return ModelBoard(layers)

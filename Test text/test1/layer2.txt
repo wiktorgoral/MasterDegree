@@ -1,5 +1,6 @@
 fire_layer
 8
+moore
 
 00000000
 00000000
@@ -10,7 +11,7 @@ fire_layer
 00000000
 00000000
 
-1 fire red
+fire red
 
 244
 444

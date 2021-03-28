@@ -1,5 +1,6 @@
 rock_layer
 8
+moore
 
 00000000
 01111110
@@ -10,7 +11,7 @@ rock_layer
 01111110
 00000000
 
-1 rock black
+rock black
 
 244
 444

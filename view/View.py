@@ -1,12 +1,13 @@
+import time
 from tkinter import *
 import numpy as np
 from typing import List
+import datetime
 
-from controller.ViewController import ViewController
+from model.Layer import Layer
 
 
 class ViewBoard:
-
     controller = None
     size = 0
     layers_count = 0
@@ -16,15 +17,14 @@ class ViewBoard:
     current_layer_index = 0
     start = False
 
-    def __init__(self, controller: ViewController, tile_size: int = 10):
+    def __init__(self, layers_names: list, layer: Layer, size: int, tile_size: int = 10):
 
-        self.controller = controller
-        self.size = controller.get_size()
+        self.size = size
         self.tile_size = tile_size
         size_pixel = self.size * self.tile_size
 
         self.current_layer_index = 0
-        self.current_layer = controller.layer_to_view(self.current_layer_index)
+        self.current_layer = layer
         self.cell_types = self.current_layer.cells_states
         self.start = False
 
@@ -49,14 +49,13 @@ class ViewBoard:
         self.draw_netting()
         for x in range(self.size):
             for y in range(self.size):
-                self.fill_cell([x, y], self.current_layer.cells[x][y], "env")
+                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], "env")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
         self.listbox_layer = Listbox(self.tooltip, font=('Times', 14), width=5, height=5)
-        layers_names = controller.get_layers_names()
         self.layers_count = len(layers_names)
-        for i in range(layers_names):
+        for i in range(len(layers_names)):
             self.listbox_layer.insert(i + 1, layers_names[i])
         self.listbox_layer.insert(len(layers_names), "Result")
         self.listbox_layer.activate(self.current_layer_index)
@@ -64,9 +63,9 @@ class ViewBoard:
         # Declaring types of cells in layer list selection
         listbox_cell_label = Label(self.tooltip, text="Available cell types:")
         self.listbox_cell = Listbox(self.tooltip, font=('Times', 14), width=5, height=5)
-        for i in range(self.cell_types):
+        for i in range(len(self.cell_types)):
             self.listbox_cell.insert(i + 1, self.cell_types[i][0])
-            self.listbox_cell.itemconfig(i + 1, {'bg': self.cell_types[i][1]})
+            self.listbox_cell.itemconfig(i, {'bg': self.cell_types[i][1]})
         self.current_type = 0
         self.listbox_cell.activate(self.current_type)
 
@@ -98,10 +97,21 @@ class ViewBoard:
         button_stop.bind("<Button-1>", self.click_stop)
         button_clear.bind("<Button-1>", self.click_clear)
         button_clear.bind("<Button-1>", self.click_reset)
-        self.mainloop()
-
-    def mainloop(self):
         self.window.mainloop()
+
+    """def mainloop(self):
+        if not self.start:
+            return
+        start = datetime.datetime.now()
+        self.controller.iteration()
+        end = datetime.datetime.now()
+        elapsed = end - start
+        print("Frame time", elapsed)
+        if elapsed > 10 ** 6:
+            mainloop()
+        else:
+            time.sleep(1)
+            mainloop()"""
 
     '''Draw functions'''
 
@@ -205,7 +215,7 @@ class ViewBoard:
 
     # On-Click function that starts simulation
     def click_start(self):
-        self.start = True
+        self.mainloop()
 
     # On-Click function that stops simulation
     def click_stop(self):

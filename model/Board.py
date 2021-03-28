@@ -24,14 +24,14 @@ class ModelBoard:
 
     # Iteration step
     def step(self):
-        self.calculate_state()
+        self.iteration_all()
         self.change_state()
         self.resolve_conflicts()
 
     # Function that changes state for each layer
     def change_state(self):
         for layer in self.layers:
-            layer.change_state()
+            layer.iteration()
 
     # Function that clears one layer
     def clear(self, i: int):
@@ -42,9 +42,13 @@ class ModelBoard:
         self.layers = deepcopy(self.start_copy)
 
     # Function that calculates states of all layers
-    def calculate_state(self):
+    def iteration_all(self):
         for layer in self.layers:
             layer.calculate_state()
+
+    def iteration_layer(self, i):
+        self.layers[i].iteration()
+
 
     # Function that checks if cells of coordinates [x y] are occupied
     def occupied(self, x: int, y: int):

@@ -15,8 +15,8 @@ class Layer:
     def __init__(self, name: str, size: int, neighbour: str, cell_states: list):
         self.name = name
         self.size = size
-        self.cells = [[Cell(0, [], False) for x in range(size)] for y in range(size)]
-        self.cells_states.extend(cell_states)
+        self.cells = [[Cell(0, [], False) for _ in range(size)] for _ in range(size)]
+        self.cells_states = cell_states
         self.add_neighbourhood(neighbour)
 
     # Function that adds neighbourhoods for all cells
@@ -33,7 +33,7 @@ class Layer:
     # Iteration step
     def step(self):
         self.calculate_state()
-        self.change_state()
+        self.iteration()
 
     # Function that clears one cell
     def clear(self, x: int, y: int):
@@ -46,7 +46,7 @@ class Layer:
 
     # Function that clears all cells
     def reset(self, layer):
-        self.layer = deepcopy(layer.cells)
+        self.layer = deepcopy(layer)
 
     # Function that calculates state for each cell
     def calculate_state(self):
@@ -55,7 +55,7 @@ class Layer:
                 self.cells[x][y].calculate_state()
 
     # Function that changes state for each cell
-    def change_state(self):
+    def iteration(self):
         for x in range(self.size):
             for y in range(self.size):
                 self.cells[x][y].current_state = self.cells[x][y].next_state
@@ -63,7 +63,7 @@ class Layer:
 
     # Function that changes cell state
     def change_cell_state(self, x: int, y: int, state: int):
-        self.cells[x][y].state = state
+        self.cells[x][y].current_state = state
 
     # Function that prints cell's state
     def return_cell_state_color(self, x: int, y: int):
@@ -77,6 +77,7 @@ class Layer:
     0   x   3
         2
     '''
+
     def moore(self):
         for x in range(1, self.size - 1):
             for y in range(1, self.size - 1):
@@ -92,6 +93,7 @@ class Layer:
     1   x   6
     2   4   7
     '''
+
     def von_neumann(self):
         for x in range(1, self.size - 1):
             for y in range(1, self.size - 1):

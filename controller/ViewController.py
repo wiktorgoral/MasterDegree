@@ -15,7 +15,10 @@ class ViewController:
     def __init__(self, board: ModelBoard, size: int):
         self.board = board
         self.board_copy = copy.deepcopy(board)
-        self.view = ViewBoard(self, size)
+        layers_names = list()
+        for layer in board.layers:
+            layers_names.append(layer.name)
+        self.view = ViewBoard(layers_names, board.layers[0], board.layer_size, size)
 
     # return size of layers
     def get_size(self):
@@ -55,8 +58,9 @@ class ViewController:
         self.board.reset()
         self.layer_to_view(self.view.current_layer)
 
-
     def iteration(self):
+        self.board.iteration_all()
+        self.view.change_layer(self.view.current_layer)
 
 
 
