@@ -18,7 +18,7 @@ class ViewController:
         layers_names = list()
         for layer in board.layers:
             layers_names.append(layer.name)
-        self.view = ViewBoard(layers_names, board.layers[0], board.layer_size, size)
+        self.view = ViewBoard(self, layers_names, board.layers[0], board.layer_size, size)
 
     # return size of layers
     def get_size(self):

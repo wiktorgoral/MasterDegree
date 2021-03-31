@@ -1,24 +1,24 @@
-import time
 from tkinter import *
 import numpy as np
 from typing import List
-import datetime
 
+from controller import ViewController
 from model.Layer import Layer
 
 
 class ViewBoard:
-    controller = None
-    size = 0
-    layers_count = 0
-    tile_size = 0
-    current_layer = None
-    current_type = 0
-    current_layer_index = 0
-    start = False
+    controller: ViewController = None
+    size: int = 0
+    layers_count: int = 0
+    tile_size: int = 0
+    current_layer: Layer = None
+    current_type: int = 0
+    current_layer_index: int = 0
+    start: bool = False
 
-    def __init__(self, layers_names: list, layer: Layer, size: int, tile_size: int = 10):
+    def __init__(self, controller, layers_names: list, layer: Layer, size: int, tile_size: int = 10):
 
+        self.controller = controller
         self.size = size
         self.tile_size = tile_size
         size_pixel = self.size * self.tile_size
@@ -53,21 +53,22 @@ class ViewBoard:
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
-        self.listbox_layer = Listbox(self.tooltip, font=('Times', 14), width=5, height=5)
+        self.listbox_layer = Listbox(self.tooltip, font=('Times', 14), width=5, height=5,
+                                     selectmode=SINGLE)
         self.layers_count = len(layers_names)
         for i in range(len(layers_names)):
-            self.listbox_layer.insert(i + 1, layers_names[i])
+            self.listbox_layer.insert(i, layers_names[i])
         self.listbox_layer.insert(len(layers_names), "Result")
-        self.listbox_layer.activate(self.current_layer_index)
 
         # Declaring types of cells in layer list selection
         listbox_cell_label = Label(self.tooltip, text="Available cell types:")
-        self.listbox_cell = Listbox(self.tooltip, font=('Times', 14), width=5, height=5)
+        self.listbox_cell = Listbox(self.tooltip, font=('Times', 14), width=5, height=5,
+                                    selectmode=SINGLE)
         for i in range(len(self.cell_types)):
-            self.listbox_cell.insert(i + 1, self.cell_types[i][0])
+            self.listbox_cell.insert(i, self.cell_types[i][0])
             self.listbox_cell.itemconfig(i, {'bg': self.cell_types[i][1]})
         self.current_type = 0
-        self.listbox_cell.activate(self.current_type)
+        self.listbox_cell.selection_set(0)
 
         # Buttons for clear and reset
         button_start = Button(self.tooltip, text="Start")
@@ -91,8 +92,8 @@ class ViewBoard:
         # Bind functions with mouse events
         self.canvas.bind("<B1-Motion>", self.click_canvas)
         self.canvas.bind("<Button-1>", self.click_canvas)
-        self.listbox_cell.bind("<Button-1>", self.click_type)
-        self.listbox_layer.bind("<Button-1>", self.click_layer)
+        self.listbox_cell.bind("<<ListboxSelect>>", self.click_type)
+        self.listbox_layer.bind("<<ListboxSelect>>", self.click_layer)
         button_start.bind("<Button-1>", self.click_start)
         button_stop.bind("<Button-1>", self.click_stop)
         button_clear.bind("<Button-1>", self.click_clear)
@@ -136,8 +137,8 @@ class ViewBoard:
     def draw_layer(self, tag: str):
         for x in range(self.size):
             for y in range(self.size):
-                if self.current_layer.cells[x][y] == "white": continue
-                self.fill_cell([x, y], self.current_layer.cells[x][y], tag)
+                if self.current_layer.cells[x][y] == 0: continue
+                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], tag)
 
     '''Logic Functions'''
 
@@ -162,10 +163,10 @@ class ViewBoard:
         self.listbox_cell.delete(0, len(self.cell_types))
         self.cell_types = types
         for i in range(len(self.cell_types)):
-            self.listbox_cell.insert(i + 1, self.cell_types[i][0])
-            self.listbox_cell.itemconfig(i + 1, {'bg': self.cell_types[i][1]})
+            self.listbox_cell.insert(i, self.cell_types[i][0])
+            self.listbox_cell.itemconfig(i, {'bg': self.cell_types[i][1]})
         self.current_type = 0
-        self.listbox_cell.activate(self.current_type)
+        self.listbox_cell.select_set(self.current_type)
 
     '''Mouse Events Functions'''
 
@@ -184,20 +185,28 @@ class ViewBoard:
         self.controller.cell_to_model(grid_position, self.current_type, self.current_layer_index)
 
     # On-Click function that tracks currently selected cell type
-    def click_type(self):
+    def click_type(self, event):
+        if len(self.listbox_cell.curselection()) == 0: return
         self.current_type = self.listbox_cell.curselection()[0]
 
     # On-Click function that tracks currently selected layer
     # Todo add result layer
-    def click_layer(self):
+    def click_layer(self, event):
+        # Bug in tkinter sometimes double activates this function
+        if len(self.listbox_layer.curselection()) == 0: return
+
         self.current_layer_index = self.listbox_layer.curselection()[0]
+        self.current_type = 0
+
         if self.current_layer_index == self.layers_count:
-            result = self.controller.result_to_view()
-            self.listbox_cell.delete(0, len(self.cell_types))
-            self.cell_types = []
-            self.current_type = 0
+            self.click_stop()
+            for i in range(self.layers_count-1):
+                self.current_layer = self.controller.layer_to_view(i)
+                self.change_types(self.cell_types)
+                self.draw_layer("new")
+            self.change_types([])
         elif self.current_layer_index == 0:
-            self.canvas.delete("new")
+            return 2
         else:
             self.change_layer(self.current_layer_index)
 
