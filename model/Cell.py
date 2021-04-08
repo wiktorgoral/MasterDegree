@@ -1,8 +1,11 @@
+from typing import List
+
+
 class Cell:
 
-    current_state = 0
-    next_state = 0
-    value = 0
+    current_state: int = 0
+    next_state: int = 0
+    value: int = 0
     neighbours = []
 
     def __init__(self, state: int, neighbours: list, blocked: bool, **value):

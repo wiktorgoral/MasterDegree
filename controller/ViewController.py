@@ -8,9 +8,9 @@ import copy
 class ViewController:
 
     # model
-    board = None
+    board: ModelBoard = None
     # View
-    view = None
+    view: ViewBoard = None
 
     def __init__(self, board: ModelBoard, size: int):
         self.board = board
@@ -39,8 +39,8 @@ class ViewController:
     def result_to_view(self):
         result = np.zeros((self.board.layer_size, self.board.layer_size), dtype=str)
         for i in range(1, self.board.layers_count):
-            for x in self.board.layer_size:
-                for y in self.board.layer_size:
+            for x in range(self.board.layer_size):
+                for y in range(self.board.layer_size):
                     if self.board.layers[i].cells[x][y] == 0: continue
                     result[x][y] = self.board.layers[i].return_cell_state_color(x, y)
         return result

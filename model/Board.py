@@ -6,10 +6,9 @@ from model.Layer import Layer
 
 
 class ModelBoard:
-    layers_count = 0
-    layers = []
-    layer_size = 0
-    result = None
+    layers_count: int = 0
+    layers: List[Layer] = []
+    layer_size: int = 0
     start_copy = None
 
     def __init__(self, layers: List[Layer]):

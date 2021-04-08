@@ -49,7 +49,7 @@ class ViewBoard:
         self.draw_netting()
         for x in range(self.size):
             for y in range(self.size):
-                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], "env")
+                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], "new")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
@@ -137,7 +137,7 @@ class ViewBoard:
     def draw_layer(self, tag: str):
         for x in range(self.size):
             for y in range(self.size):
-                if self.current_layer.cells[x][y] == 0: continue
+                if self.current_layer.cells[x][y].current_state == 0: continue
                 self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], tag)
 
     '''Logic Functions'''
@@ -180,9 +180,7 @@ class ViewBoard:
 
         # Fill rectangle with appropriate color and change cell's board status
         self.fill_cell(grid_position, self.cell_types[self.current_type][1], "new")
-        self.current_layer.cells[grid_position[0]][grid_position[1]] = self.cell_types[self.current_type][1]
-
-        self.controller.cell_to_model(grid_position, self.current_type, self.current_layer_index)
+        self.current_layer.cells[grid_position[0]][grid_position[1]].current_state = self.current_type
 
     # On-Click function that tracks currently selected cell type
     def click_type(self, event):
@@ -202,11 +200,9 @@ class ViewBoard:
             self.click_stop()
             for i in range(self.layers_count):
                 self.current_layer = self.controller.layer_to_view(i)
-                self.change_types(self.cell_types)
+                self.change_types(self.current_layer.cells_states)
                 self.draw_layer("new")
             self.change_types([])
-        elif self.current_layer_index == 0:
-            return 2
         else:
             self.change_layer(self.current_layer_index)
 

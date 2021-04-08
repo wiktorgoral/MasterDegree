@@ -1,16 +1,17 @@
 import os
 from copy import deepcopy
+from typing import List, Tuple
 
 from model.Cell import Cell
 
 
 class Layer:
-    name = ""
-    size = 0
-    cells = [[Cell(0, [], False) for x in range(2)] for y in range(2)]
+    name: str
+    size: int
+    cells: List[List[Cell]] = [[Cell(0, [], False) for x in range(2)] for y in range(2)]
     # Array of tuples (state's name, state's color)
-    cells_states = []
-    neighbourhood = ""
+    cells_states: List[Tuple[str, str]] = []
+    neighbourhood: str
 
     def __init__(self, name: str, size: int, neighbour: str, cell_states: list):
         self.name = name
@@ -45,10 +46,6 @@ class Layer:
             for y in range(self.size):
                 self.clear(x, y)
 
-    # Function that clears all cells
-    def reset(self, layer):
-        self.layer = deepcopy(layer)
-
     # Function that calculates state for each cell
     def calculate_state(self):
         for x in range(self.size):
@@ -62,9 +59,6 @@ class Layer:
                 self.cells[x][y].current_state = self.cells[x][y].next_state
                 self.cells[x][y].next_state = self.cells_states[0][0]
 
-    # Function that changes cell state
-    def change_cell_state(self, x: int, y: int, state: int):
-        self.cells[x][y].current_state = state
 
     # Function that prints cell's state
     def return_cell_state_color(self, x: int, y: int):
@@ -121,5 +115,5 @@ class Layer:
         for x in range(self.size):
             for y in range(self.size):
                 if self.cells[x][y].current_state != 0:
-                    file.write(self.cells[x][y].value + os.linesep)
+                    file.write(str(self.cells[x][y].value) + os.linesep)
         file.close()
