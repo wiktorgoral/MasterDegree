@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from typing import List
 
@@ -5,7 +6,6 @@ from model.Layer import Layer
 
 
 class ModelBoard:
-
     layers_count = 0
     layers = []
     layer_size = 0
@@ -49,7 +49,6 @@ class ModelBoard:
     def iteration_layer(self, i):
         self.layers[i].iteration()
 
-
     # Function that checks if cells of coordinates [x y] are occupied
     def occupied(self, x: int, y: int):
         occupied = False
@@ -81,3 +80,10 @@ class ModelBoard:
             raise Exception("Layers not same size")
         else:
             self.layers.append(layer)
+
+    def to_file(self, path):
+        os.mkdir(path)
+        for layer in self.layers:
+            layer.to_file(path)
+
+

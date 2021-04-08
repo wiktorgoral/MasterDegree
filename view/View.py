@@ -200,7 +200,7 @@ class ViewBoard:
 
         if self.current_layer_index == self.layers_count:
             self.click_stop()
-            for i in range(self.layers_count-1):
+            for i in range(self.layers_count):
                 self.current_layer = self.controller.layer_to_view(i)
                 self.change_types(self.cell_types)
                 self.draw_layer("new")
