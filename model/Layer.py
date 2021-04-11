@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from typing import List, Tuple
 
 from model.Cell import Cell

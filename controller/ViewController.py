@@ -45,10 +45,6 @@ class ViewController:
                     result[x][y] = self.board.layers[i].return_cell_state_color(x, y)
         return result
 
-    # change cell from model to same in view
-    def cell_to_model(self, position, cell_type: int, layer: int):
-        self.board.layers[layer].change_cell_state(position[0], position[1], cell_type)
-
     # clear layer of cells
     def clear(self, i: int):
         self.board.layers[i].clear_all()
@@ -56,11 +52,11 @@ class ViewController:
     # Todo implement it
     def reset(self):
         self.board.reset()
-        self.layer_to_view(self.view.current_layer)
+        self.layer_to_view(self.view.current_layer_index)
 
     def iteration(self):
         self.board.iteration_all()
-        self.view.change_layer(self.view.current_layer)
+        self.view.change_layer(self.view.current_layer_index)
 
 
 

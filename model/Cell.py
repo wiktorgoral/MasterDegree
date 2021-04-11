@@ -1,12 +1,11 @@
-from typing import List
 
 
 class Cell:
 
     current_state: int = 0
     next_state: int = 0
-    value: int = 0
-    neighbours = []
+    value: float = 0
+    neighbours: list = []
 
     def __init__(self, state: int, neighbours: list, blocked: bool, **value):
         self.value = value.get("value")
@@ -29,8 +28,8 @@ class Cell:
     def life_example(self):
         value = 0
         for i in range(len(self.neighbours)):
-            if self.neighbours[i] == 1: value+=1
-        if self.current_state == 1 and value in [2,3]:
+            if self.neighbours[i] == 1: value += 1
+        if self.current_state == 1 and value in [2, 3]:
             self.next_state = 1
         if self.current_state == 0 and value == 3:
             self.next_state = 1
