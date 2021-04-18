@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from typing import List, Tuple
 
 from model.Cell import Cell
@@ -11,6 +12,7 @@ class Layer:
     # Array of tuples (state's name, state's color)
     cells_states: List[Tuple[str, str]] = []
     neighbourhood: str
+    rules: list
 
     def __init__(self, name: str, size: int, neighbour: str, cell_states: list):
         self.name = name
@@ -58,12 +60,6 @@ class Layer:
                 self.cells[x][y].current_state = self.cells[x][y].next_state
                 self.cells[x][y].next_state = self.cells_states[0][0]
 
-
-    # Function that prints cell's state
-    def return_cell_state_color(self, x: int, y: int):
-        state = self.cells[x][y].current_state
-        print(self.cells_states[state][0])
-
     '''
     neighbourhood indexes
     Moore:
@@ -96,6 +92,7 @@ class Layer:
                 self.cells[x][y].neighbours_add(self.cells[x][y - 1])
                 self.cells[x][y].neighbours_add(self.cells[x + 1][y])
 
+    # Save layer to txt file
     def to_file(self, path):
         file = open(os.path.join(path, self.name), "x")
         file.write(self.name + os.linesep)
@@ -116,3 +113,26 @@ class Layer:
                 if self.cells[x][y].current_state != 0:
                     file.write(str(self.cells[x][y].value) + os.linesep)
         file.close()
+
+    # Function that can be assigned to calculate_state for patterns
+    def state_transition(self):
+        for rule in self.rules:
+            self.rule(rule)
+
+    # Sliding window that finds pattern(rule) in matrix of cells
+    def rule(self, rule: Tuple[List[List[int]], List[List[int]]]):
+        size_rule = len(rule[0])
+        for x in range(0, self.size - 1, size_rule):
+            for y in range(0, self.size - 1, size_rule):
+                flag = True
+
+                for xi in range(size_rule):
+                    if not flag: break
+
+                    for yi in range(size_rule):
+                        if self.cells[x + xi][y + yi].current_state != rule[0][xi][yi]:
+                            flag = False
+                if flag:
+                    for xi in range(size_rule):
+                        for yi in range(size_rule):
+                            self.cells[x + xi][y + yi].next_state = rule[1][xi][yi]

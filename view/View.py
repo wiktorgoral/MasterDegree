@@ -31,6 +31,7 @@ class ViewBoard:
         # Declaring window
         self.window = Tk()
         self.window.geometry(str(size_pixel + 140) + "x" + str(size_pixel))
+        self.window.resizable(width=False, height=False)
         self.window.title("Board")
 
         # Splitting window into two columns for tooltip and canvas

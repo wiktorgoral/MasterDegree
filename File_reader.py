@@ -90,6 +90,7 @@ def read_layer_excel(name: str):
                 color_hex = "#" + color_hex[2:]
                 cells[row - 4][col - 1] = (cell_value, color_hex)
 
+        # Create layer with all parameters
         layer = Layer(name, size, neighbourhood, cells_states)
         for x in range(size):
             for y in range(size):
@@ -97,7 +98,6 @@ def read_layer_excel(name: str):
                 for typee in range(len(cells_states)):
                     if cells_states[typee][1] == cells[x][y][1]:
                         layer.cells[x][y].current_state = typee
-
 
         layers.append(layer)
 

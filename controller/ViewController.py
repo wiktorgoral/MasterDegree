@@ -20,22 +20,22 @@ class ViewController:
             layers_names.append(layer.name)
         self.view = ViewBoard(self, layers_names, board.layers[0], board.layer_size, size)
 
-    # return size of layers
+    # Return size of layers
     def get_size(self):
         return self.board.layer_size
 
-    # return names of layers
+    # Return names of layers
     def get_layers_names(self):
         names = []
         for layer in self.board.layers:
             names.append(layer.name)
         return names
 
-    # return layer's cells
+    # Return layer's cells
     def layer_to_view(self, i: int):
         return self.board.layers[i]
 
-    # return all layers cells
+    # Return all layers cells
     def result_to_view(self):
         result = np.zeros((self.board.layer_size, self.board.layer_size), dtype=str)
         for i in range(1, self.board.layers_count):
@@ -45,7 +45,7 @@ class ViewController:
                     result[x][y] = self.board.layers[i].return_cell_state_color(x, y)
         return result
 
-    # clear layer of cells
+    # Clear layer of cells
     def clear(self, i: int):
         self.board.layers[i].clear_all()
 

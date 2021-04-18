@@ -80,6 +80,7 @@ class ModelBoard:
         else:
             self.layers.append(layer)
 
+    # Save board to folder with txt files
     def to_file(self, path):
         os.mkdir(path)
         for layer in self.layers:
