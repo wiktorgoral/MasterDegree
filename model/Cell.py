@@ -1,3 +1,6 @@
+from typing import List, Tuple
+
+
 class Cell:
     current_state: int = 0
     next_state: int = 0
@@ -117,3 +120,26 @@ class Cell:
 
             if value in [1, 2]: self.next_state = 1
             else: self.next_state = 3
+
+    # Sliding window is comparing rule(list) with cell and it's neighbourhood
+    # similar to image processing morphological operations
+    def sliding_window(self, rules: List[Tuple[List[int], List[int]]]):
+        # creation of list that represents cell state and neighbours states
+        window = []
+        for neighbour in self.neighbours:
+            window.append(neighbour.current_state)
+        window.insert(int(len(self.neighbours)/2), self.current_state)
+
+        # comparing rules to window
+        for rule in rules:
+            match = rule[0]
+            result = rule[1]
+            flag = True
+            for i in range(len(window)):
+                if match[i] != window[i]: flag = False
+            if flag:
+                for i in range(len(result)):
+                    if i+0.5 == len(result)/2:
+                        self.next_state = result[i]
+                    else:
+                        self.neighbours[i].next_state = result[i]

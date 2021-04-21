@@ -1,11 +1,52 @@
 import os
-import webcolors
 from typing import List
 
-from openpyxl import load_workbook, styles
+from openpyxl import load_workbook
 
 from model.Layer import Layer
 from model.Board import ModelBoard
+
+
+def read_von_neumann_excel(sheet, start_row, start_column, cells_states):
+    zero_color = sheet.cell(start_row + 1, start_column).fill.start_color.value
+    zero_color = "#" + zero_color[2:]
+    zero_type = 0
+    for i in range(len(cells_states)):
+        if cells_states[i][1] == zero_color: zero_type = i
+    one_color = sheet.cell(start_row, start_column + 1).fill.start_color.value
+    one_color = "#" + one_color[2:]
+    one_type = 0
+    for i in range(len(cells_states)):
+        if cells_states[i][1] == one_color: one_type = i
+    two_color = sheet.cell(start_row + 1, start_column + 1).fill.start_color.value
+    two_color = "#" + two_color[2:]
+    two_type = 0
+    for i in range(len(cells_states)):
+        if cells_states[i][1] == two_color: two_type = i
+    three_color = sheet.cell(start_row + 2, start_column + 1).fill.start_color.value
+    three_color = "#" + three_color[2:]
+    three_type = 0
+    for i in range(len(cells_states)):
+        if cells_states[i][1] == three_color: three_type = i
+    four_color = sheet.cell(start_row + 1, start_column + 2).fill.start_color.value
+    four_color = "#" + four_color[2:]
+    four_type = 0
+    for i in range(len(cells_states)):
+        if cells_states[i][1] == four_color: four_type = i
+    rule = [zero_type, one_type, two_type, three_type, four_type]
+    return rule
+
+def read_moore_excel(sheet, start_row, start_column, cells_states):
+    rule = []
+    for x in range(4):
+        for y in range(4):
+            color = sheet.cell(start_row + x, start_column+y).fill.start_color.value
+            color = "#" + color[2:]
+            typee = 0
+            for i in range(len(cells_states)):
+                if cells_states[i][1] == color: typee = i
+            rule.append(typee)
+    return rule
 
 
 def read_layer_txt(name: str):
@@ -70,7 +111,7 @@ def read_layer_excel(name: str):
 
         # read cell types
         cells_states.append(("nothing", "white"))
-        for row in range(size + 5, sheet.max_row+1):
+        for row in range(size + 5, sheet.max_row + 1):
             if sheet.cell(row, 1).value is None: break
 
             type_name = str(sheet.cell(row, 1).value)
@@ -82,7 +123,7 @@ def read_layer_excel(name: str):
         for row in range(4, sheet.max_row):
             if sheet.cell(row, 1).value is None: break
 
-            for col in range(1, sheet.max_column+1):
+            for col in range(1, sheet.max_column + 1):
                 if sheet.cell(row, col).value is None: break
 
                 cell_value = float(sheet.cell(row, col).value)
@@ -100,6 +141,28 @@ def read_layer_excel(name: str):
                         layer.cells[x][y].current_state = typee
 
         layers.append(layer)
+
+        # Reading sliding window rules - optional
+        if neighbourhood == "von_neumann":
+            rules = []
+            rule_size = sheet.max_row - (size + 5) / 4
+            for i in range(rule_size):
+                match = read_von_neumann_excel(sheet, size + 7 + i*4, 0, cells_states)
+                result = read_von_neumann_excel(sheet, size + 7 + i*4, 5, cells_states)
+                rule = (match, result)
+                rules.append(rule)
+            layer.rules = rules
+        elif neighbourhood == "moore":
+            rules = []
+            rule_size = sheet.max_row - (size + 5) / 4
+            for i in range(rule_size):
+                match = read_moore_excel(sheet, size + 7 + i * 4, 0, cells_states)
+                result = read_moore_excel(sheet, size + 7 + i * 4, 5, cells_states)
+                rule = (match, result)
+                rules.append(rule)
+            layer.rules = rules
+
+
 
     return layers
 

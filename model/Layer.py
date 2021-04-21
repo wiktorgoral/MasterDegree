@@ -53,6 +53,11 @@ class Layer:
             for y in range(self.size):
                 self.cells[x][y].calculate_state()
 
+    def calculate_state_with_rules(self):
+        for x in range(self.size):
+            for y in range(self.size):
+                self.cells[x][y].calculate_state(self.rules)
+
     # Function that changes state for each cell
     def iteration(self):
         for x in range(self.size):
@@ -113,26 +118,3 @@ class Layer:
                 if self.cells[x][y].current_state != 0:
                     file.write(str(self.cells[x][y].value) + os.linesep)
         file.close()
-
-    # Function that can be assigned to calculate_state for patterns
-    def state_transition(self):
-        for rule in self.rules:
-            self.rule(rule)
-
-    # Sliding window that finds pattern(rule) in matrix of cells
-    def rule(self, rule: Tuple[List[List[int]], List[List[int]]]):
-        size_rule = len(rule[0])
-        for x in range(0, self.size - 1, size_rule):
-            for y in range(0, self.size - 1, size_rule):
-                flag = True
-
-                for xi in range(size_rule):
-                    if not flag: break
-
-                    for yi in range(size_rule):
-                        if self.cells[x + xi][y + yi].current_state != rule[0][xi][yi]:
-                            flag = False
-                if flag:
-                    for xi in range(size_rule):
-                        for yi in range(size_rule):
-                            self.cells[x + xi][y + yi].next_state = rule[1][xi][yi]
