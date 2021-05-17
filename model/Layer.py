@@ -63,7 +63,7 @@ class Layer:
         for x in range(self.size):
             for y in range(self.size):
                 self.cells[x][y].current_state = self.cells[x][y].next_state
-                self.cells[x][y].next_state = self.cells_states[0][0]
+                self.cells[x][y].next_state = 0
 
     '''
     neighbourhood indexes

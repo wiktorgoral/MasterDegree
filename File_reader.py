@@ -36,11 +36,12 @@ def read_von_neumann_excel(sheet, start_row, start_column, cells_states):
     rule = [zero_type, one_type, two_type, three_type, four_type]
     return rule
 
+
 def read_moore_excel(sheet, start_row, start_column, cells_states):
     rule = []
     for x in range(4):
         for y in range(4):
-            color = sheet.cell(start_row + x, start_column+y).fill.start_color.value
+            color = sheet.cell(start_row + x, start_column + y).fill.start_color.value
             color = "#" + color[2:]
             typee = 0
             for i in range(len(cells_states)):
@@ -143,26 +144,19 @@ def read_layer_excel(name: str):
         layers.append(layer)
 
         # Reading sliding window rules - optional
-        if neighbourhood == "von_neumann":
-            rules = []
-            rule_size = sheet.max_row - (size + 5) / 4
-            for i in range(rule_size):
-                match = read_von_neumann_excel(sheet, size + 7 + i*4, 0, cells_states)
-                result = read_von_neumann_excel(sheet, size + 7 + i*4, 5, cells_states)
-                rule = (match, result)
-                rules.append(rule)
-            layer.rules = rules
-        elif neighbourhood == "moore":
-            rules = []
-            rule_size = sheet.max_row - (size + 5) / 4
-            for i in range(rule_size):
+        rules = []
+        rule_size = int((sheet.max_row - (size + 3 + len(cells_states))) / 4)
+        for i in range(rule_size):
+            match, result = [], []
+            if neighbourhood == "von_neumann":
+                match = read_von_neumann_excel(sheet, size + 7 + i * 4, 0, cells_states)
+                result = read_von_neumann_excel(sheet, size + 7 + i * 4, 5, cells_states)
+            elif neighbourhood == "moore":
                 match = read_moore_excel(sheet, size + 7 + i * 4, 0, cells_states)
                 result = read_moore_excel(sheet, size + 7 + i * 4, 5, cells_states)
-                rule = (match, result)
-                rules.append(rule)
-            layer.rules = rules
-
-
+            rule = (match, result)
+            rules.append(rule)
+        layer.rules = rules
 
     return layers
 
