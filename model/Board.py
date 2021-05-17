@@ -19,7 +19,7 @@ class ModelBoard:
         self.layers_count = len(layers)
         self.layer_size = size
         self.layers = layers
-        self.start_copy = deepcopy(self.layers)
+        #self.start_copy = deepcopy(self.layers)
 
     # Iteration step
     def step(self):

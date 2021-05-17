@@ -1,0 +1,22 @@
+Layer
+8
+moore
+
+00000000
+00000000
+00000000
+00000000
+00002000
+00000000
+00000000
+00000000
+
+visited gray
+ant red
+ant red
+ant red
+ant red
+ant red
+ant red
+ant red
+ant red

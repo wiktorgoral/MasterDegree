@@ -14,7 +14,7 @@ class ViewController:
 
     def __init__(self, board: ModelBoard, size: int):
         self.board = board
-        self.board_copy = copy.deepcopy(board)
+        #self.board_copy = copy.deepcopy(board)
         layers_names = list()
         for layer in board.layers:
             layers_names.append(layer.name)
