@@ -1,5 +1,4 @@
 import os
-from copy import deepcopy
 from typing import List
 
 from model.Layer import Layer
@@ -9,52 +8,52 @@ class ModelBoard:
     layers_count: int = 0
     layers: List[Layer] = []
     layer_size: int = 0
-    start_copy = None
     layer_ranking: List[int] = []
 
-    def __init__(self, layers: List[Layer]):
+    def __init__(self, layers: List[Layer], strategy: str):
         size = layers[0].size
         for layer in layers:
             if layer.size != size:
-                raise Exception("Layers not same size")
+                raise Exception("Layers are not same size")
         self.layers_count = len(layers)
         self.layer_size = size
         self.layers = layers
-        #self.start_copy = deepcopy(self.layers)
 
-    # Iteration step
+        # define layer competition strategy
+        if strategy == "unaware strategy":
+            self.iteration = self.unaware_strategy
+        elif strategy == "player strategy":
+            self.iteration = self.player_strategy
+        elif strategy == "all layers":
+            self.iteration = self.all_layers_strategy
+        else: raise NameError("No strategy")
+
     # Strategy in which all layers iterate and after resolve conflicts
-    def step(self):
-        self.iteration_all()
-        self.resolve_conflicts(self.layer_ranking)
+    def all_layers_strategy(self):
+        for layer in self.layers:
+            layer.step()
+            self.resolve_conflicts(self.layer_ranking)
 
     # Strategy in which all layers iterate and conflicts are not resolved
     def unaware_strategy(self):
-        self.iteration_all()
+
+        for layer in self.layers:
+            layer.step()
 
     # Strategy in which layers take turns
     def player_strategy(self):
-        for i in self.layer_ranking:
+        for i in range(self.layers_count):
             self.layers[i].step()
+            self.layer_ranking[0] = i
             self.resolve_conflicts(self.layer_ranking)
-
-    # Function that changes state for each layer
-    def change_state(self):
-        for layer in self.layers:
-            layer.iteration()
 
     # Function that clears one layer
     def clear(self, i: int):
         self.layers[i].clear_all()
 
-    # Function that clears all layers
-    def reset(self):
-        self.layers = deepcopy(self.start_copy)
-
     # Function that calculates states of all layers
-    def iteration_all(self):
-        for layer in self.layers:
-            layer.calculate_state()
+    def iteration(self):
+        return 1
 
     # Function that checks if cells of coordinates [x y] in all layers are occupied
     def occupied(self, x: int, y: int):

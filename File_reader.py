@@ -3,6 +3,7 @@ from typing import List
 
 from openpyxl import load_workbook
 
+from model.Cell import Cell
 from model.Layer import Layer
 from model.Board import ModelBoard
 
@@ -51,6 +52,17 @@ def read_moore_excel(sheet, start_row, start_column, cells_states):
 
 
 def read_layer_txt(name: str):
+    example = None
+    if name == "game of life":
+        example = name
+        name = "Examples/Game of Life/text/layer1.txt"
+    elif name == "Langton ant":
+        example = name
+        name = "Examples/Langton Ant/text/layer1.txt"
+    elif name == "wire world":
+        example = name
+        name = "Examples/Wire World/text/layer1.txt"
+
     with open(name) as reader:
 
         name = reader.readline().rstrip('\n')
@@ -84,19 +96,35 @@ def read_layer_txt(name: str):
             line = reader.readline()
 
         # Create layer with all parameters
-        layer = Layer(name, size, neighbourhood, cells_states)
+        cells_class: List[List[Cell]] = list(list())
         i = 0
         for x in range(size):
+            cells_class.append(list())
             for y in range(size):
-                layer.cells[x][y].current_state = cells[x][y]
+                cells_class[x].append(Cell(cells[x][y], value=values[i], example=example))
                 if cells[x][y] != 0:
-                    layer.cells[x][y].value = values[i]
                     i += 1
 
+        layer = Layer(name, cells_class, neighbourhood, cells_states)
         return layer
 
 
 def read_layer_excel(name: str):
+    example = None
+
+    if name == "forest fire":
+        example = name
+        name = "Examples/Forest Fire/excel/example.xlsx"
+    elif name == "game of life":
+        example = name
+        name = "Examples/Game of Life/excel/example.xlsx"
+    elif name == "Langton ant":
+        example = name
+        name = "Examples/Langton Ant/excel/example.xlsx"
+    elif name == "wire world":
+        example = name
+        name = "Examples/Wire World/excel/example.xlsx"
+
     workbook = load_workbook(filename=name)
     sheets_names = workbook.get_sheet_names()
     layers: List[Layer] = list()
@@ -130,17 +158,19 @@ def read_layer_excel(name: str):
                 cell_value = float(sheet.cell(row, col).value)
                 color_hex = sheet.cell(row, col).fill.start_color.value
                 color_hex = "#" + color_hex[2:]
-                cells[row - 4][col - 1] = (cell_value, color_hex)
+                cells[col - 1][row - 4] = (cell_value, color_hex)
 
-        # Create layer with all parameters
-        layer = Layer(name, size, neighbourhood, cells_states)
+        # Create cell objects
+        cells_class: List[List[Cell]] = list(list())
         for x in range(size):
+            cells_class.append(list())
             for y in range(size):
-                layer.cells[x][y].value = cells[x][y][0]
+                cells_class[x].append(Cell(0, value=cells[x][y][0], example=example))
                 for typee in range(len(cells_states)):
                     if cells_states[typee][1] == cells[x][y][1]:
-                        layer.cells[x][y].current_state = typee
+                        cells_class[x][y].current_state = typee
 
+        layer = Layer(name, cells_class, neighbourhood, cells_states)
         layers.append(layer)
 
         # Reading sliding window rules - optional
@@ -161,7 +191,7 @@ def read_layer_excel(name: str):
     return layers
 
 
-def read_board(folder: str):
+def read_board(folder: str, strategy: str):
     layers = list()
     number_of_files = next(os.walk(folder))[2]
     for file in number_of_files:
@@ -170,4 +200,4 @@ def read_board(folder: str):
             layers.append(layer)
         elif file.endswith(".xlsx"):
             layers = read_layer_excel(os.path.join(folder, file))
-    return ModelBoard(layers)
+    return ModelBoard(layers, strategy)

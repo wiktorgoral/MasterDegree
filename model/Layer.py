@@ -8,19 +8,25 @@ from model.Cell import Cell
 class Layer:
     name: str
     size: int
-    cells: List[List[Cell]] = [[Cell(0, [], False) for x in range(2)] for y in range(2)]
+    cells: List[List[Cell]]
     # Array of tuples (state's name, state's color)
     cells_states: List[Tuple[str, str]] = []
     neighbourhood: str
     rules: list
+    cells_copy: List[List[Cell]] = list(list())
+    iterationn: int = 0
 
-    def __init__(self, name: str, size: int, neighbour: str, cell_states: list):
+    def __init__(self, name: str, cells: List[List[Cell]], neighbour: str, cell_states: list):
         self.name = name
-        self.size = size
-        self.cells = [[Cell(0, [], False) for _ in range(size)] for _ in range(size)]
+        self.size = len(cells)
+        self.cells = cells
         self.cells_states = cell_states
         self.neighbourhood = neighbour
         self.add_neighbourhood(neighbour)
+        for x in range(self.size):
+            self.cells_copy.append(list())
+            for y in range(self.size):
+                self.cells_copy[x].append(deepcopy(self.cells[x][y]))
 
     # Function that adds neighbourhoods for all cells
     def add_neighbourhood(self, neighbour: str):
@@ -35,8 +41,10 @@ class Layer:
 
     # Iteration step
     def step(self):
+        print(self.iterationn)
         self.calculate_state()
         self.iteration()
+        self.iterationn += 1
 
     # Function that clears one cell
     def clear(self, x: int, y: int):
@@ -68,25 +76,26 @@ class Layer:
     '''
     neighbourhood indexes
     Moore:
-        1
-    0   x   3
-        2
+    0   3   5
+    1   x   6
+    2   4   7
     '''
 
     def moore(self):
         for x in range(1, self.size - 1):
             for y in range(1, self.size - 1):
-
+                neighbours = []
                 for xi in range(x - 1, x + 2):
                     for yi in range(y - 1, y + 2):
                         if xi == x and yi == y: continue
-                        self.cells[x][y].neighbours_add(self.cells[xi][yi])
+                        neighbours.append(self.cells[xi][yi])
+                self.cells[x][y].neighbours = neighbours
 
     '''
     Von Neumann:
-    0   3   5
-    1   x   6
-    2   4   7
+        1
+    0   x   3
+        2
     '''
 
     def von_neumann(self):

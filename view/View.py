@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 import numpy as np
 from typing import List
@@ -26,7 +27,6 @@ class ViewBoard:
         self.current_layer_index = 0
         self.current_layer = layer
         self.cell_types = self.current_layer.cells_states
-        self.start = False
 
         # Declaring window
         self.window = Tk()
@@ -98,22 +98,12 @@ class ViewBoard:
         button_start.bind("<Button-1>", self.click_start)
         button_stop.bind("<Button-1>", self.click_stop)
         button_clear.bind("<Button-1>", self.click_clear)
-        button_clear.bind("<Button-1>", self.click_reset)
-        self.window.mainloop()
 
-    """def mainloop(self):
-        if not self.start:
-            return
-        start = datetime.datetime.now()
+    def mainloop(self):
+        start = time.time()
         self.controller.iteration()
-        end = datetime.datetime.now()
-        elapsed = end - start
-        print("Frame time", elapsed)
-        if elapsed > 10 ** 6:
-            mainloop()
-        else:
-            time.sleep(1)
-            mainloop()"""
+        if self.start:
+            self.window.after(1000 - int(time.time() - start), self.mainloop)
 
     '''Draw functions'''
 
@@ -154,7 +144,14 @@ class ViewBoard:
         return self.tile_size * grid_position
 
     def change_layer(self, layer: int):
-        self.click_stop()
+        if self.current_layer_index == self.layers_count:
+            self.canvas.delete("new")
+            for i in range(self.layers_count):
+                self.current_layer = self.controller.layer_to_view(i)
+                self.change_types(self.current_layer.cells_states)
+                self.draw_layer("new")
+            self.change_types([])
+            return
         self.current_layer = self.controller.layer_to_view(layer)
         self.change_types(self.current_layer.cells_states)
         self.canvas.delete("new")
@@ -189,40 +186,26 @@ class ViewBoard:
         self.current_type = self.listbox_cell.curselection()[0]
 
     # On-Click function that tracks currently selected layer
-    # Todo add result layer
     def click_layer(self, event):
         # Bug in tkinter sometimes double activates this function
         if len(self.listbox_layer.curselection()) == 0: return
 
         self.current_layer_index = self.listbox_layer.curselection()[0]
         self.current_type = 0
-
-        if self.current_layer_index == self.layers_count:
-            self.click_stop()
-            for i in range(self.layers_count):
-                self.current_layer = self.controller.layer_to_view(i)
-                self.change_types(self.current_layer.cells_states)
-                self.draw_layer("new")
-            self.change_types([])
-        else:
-            self.change_layer(self.current_layer_index)
+        self.change_layer(self.current_layer_index)
 
     # On-Click function that resets current layer
-    def click_clear(self):
+    def click_clear(self, event):
         self.start = False
         self.controller.clear(self.current_layer_index)
         self.change_layer(self.current_layer_index)
 
-    # On-Click function that resets whole simulation
-    # Todo add layers clear with controller
-    def click_reset(self):
-        self.start = False
-        self.controller.reset()
-
     # On-Click function that starts simulation
-    def click_start(self):
+    def click_start(self, event):
+        self.start = True
         self.mainloop()
 
     # On-Click function that stops simulation
-    def click_stop(self):
+    def click_stop(self, event):
         self.start = False
+

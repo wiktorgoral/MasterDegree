@@ -7,17 +7,27 @@ class Cell:
     value: float = 0
     neighbours: list = []
 
-    def __init__(self, state: int, neighbours: list, blocked: bool, **value):
-        self.value = value.get("value")
+    def __init__(self, state: int, **kwargs):
         self.current_state = state
-        self.neighbours = neighbours
-        self.blocked = blocked
+        if "value" in kwargs:
+            self.value = kwargs.get("value")
+        if "example" in kwargs:
+            name = kwargs["example"]
+            if name == "forest fire":
+                self.calculate_state = self.life_example
+            elif name == "game of life":
+                self.calculate_state = self.life_example
+            elif name == "Langton ant":
+                self.calculate_state = self.langton_example
+            elif name == "wire world":
+                self.calculate_state = self.wireworld_example
+            elif name is None: return
+            else: raise NameError("Example does not exist")
 
     def clear(self):
         self.current_state = 0
         self.next_state = 0
         self.value = 0
-        self.blocked = False
 
     def calculate_state(self):
         return 1
@@ -29,15 +39,19 @@ class Cell:
     # Game of Life with moore neighbourhood
     def life_example(self):
         # States: 0 - dead, 1 - alive
-        value = 0
+        alive = 0
         for neighbour in self.neighbours:
-            value += neighbour.current_state
-        if self.current_state == 1 and value in [2, 3]:
-            self.next_state = 1
-        if self.current_state == 0 and value == 3:
-            self.next_state = 1
-        else:
-            self.next_state = 0
+            alive += neighbour.current_state
+        if self.current_state == 1:
+            if alive in [2, 3]:
+                self.next_state = 1
+            else:
+                self.next_state = 0
+        if self.current_state == 0:
+            if alive == 3:
+                self.next_state = 1
+            else:
+                self.next_state = 0
 
     # https://en.wikipedia.org/wiki/Langton%27s_ant
     # Langton's Ant with moore neighbourhood
