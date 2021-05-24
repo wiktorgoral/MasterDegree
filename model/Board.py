@@ -52,6 +52,7 @@ class ModelBoard:
         self.layers[i].clear_all()
 
     # Function that calculates states of all layers
+    # You can implement your own iteration here
     def iteration(self):
         return 1
 

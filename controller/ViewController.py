@@ -36,6 +36,10 @@ class ViewController:
     def clear(self, i: int):
         self.board.layers[i].clear_all()
 
+    def reset_all(self):
+        for layer in self.board.layers:
+            layer.reset()
+
     def iteration(self):
         self.board.iteration()
         self.view.change_layer(self.view.current_layer_index)

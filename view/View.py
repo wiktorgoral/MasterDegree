@@ -74,8 +74,10 @@ class ViewBoard:
         # Buttons for clear and reset
         button_start = Button(self.tooltip, text="Start")
         button_stop = Button(self.tooltip, text="Stop")
+        button_iterate = Button(self.tooltip, text="Iterate this")
         button_clear = Button(self.tooltip, text="Clear layer")
-        button_reset = Button(self.tooltip, text="Reset all")
+        button_reset = Button(self.tooltip, text="Reset")
+        button_reset_all = Button(self.tooltip, text="Reset all")
 
         # Laying out buttons in tooltip
         button_start.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
@@ -87,8 +89,10 @@ class ViewBoard:
         listbox_cell_label.grid(row=4, column=0, sticky="ew", padx=5)
         self.listbox_cell.grid(row=5, column=0, sticky="ew", padx=5, pady=5)
 
-        button_clear.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
-        button_reset.grid(row=7, column=0, sticky="ew", padx=5, pady=5)
+        button_iterate.grid(row=6, column=0, sticky="ew", padx=5, pady=5)
+        button_clear.grid(row=7, column=0, sticky="ew", padx=5, pady=5)
+        button_reset.grid(row=8, column=0, sticky="ew", padx=5, pady=5)
+        button_reset_all.grid(row=9, column=0, sticky="ew", padx=5, pady=5)
 
         # Bind functions with mouse events
         self.canvas.bind("<B1-Motion>", self.click_canvas)
@@ -98,12 +102,22 @@ class ViewBoard:
         button_start.bind("<Button-1>", self.click_start)
         button_stop.bind("<Button-1>", self.click_stop)
         button_clear.bind("<Button-1>", self.click_clear)
+        button_reset.bind("<Button-1>", self.click_reset)
+        button_reset_all.bind("<Button-1>", self.click_reset_all)
+        button_iterate.bind("<Button-1>", self.click_iterate)
 
     def mainloop(self):
         start = time.time()
         self.controller.iteration()
         if self.start:
             self.window.after(1000 - int(time.time() - start), self.mainloop)
+
+    def iterate(self):
+        start = time.time()
+        self.current_layer.step()
+        self.change_layer(self.current_layer_index)
+        if self.start:
+            self.window.after(1000 - int(time.time() - start), self.iterate)
 
     '''Draw functions'''
 
@@ -200,6 +214,14 @@ class ViewBoard:
         self.controller.clear(self.current_layer_index)
         self.change_layer(self.current_layer_index)
 
+    def click_reset(self, event):
+        self.current_layer.reset()
+        self.change_layer(self.current_layer_index)
+
+    def click_reset_all(self, event):
+        self.controller.reset_all()
+        self.change_layer(self.current_layer_index)
+
     # On-Click function that starts simulation
     def click_start(self, event):
         self.start = True
@@ -209,3 +231,6 @@ class ViewBoard:
     def click_stop(self, event):
         self.start = False
 
+    def click_iterate(self, event):
+        self.start = True
+        self.iterate()

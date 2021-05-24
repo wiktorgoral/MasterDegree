@@ -13,7 +13,7 @@ class Layer:
     cells_states: List[Tuple[str, str]] = []
     neighbourhood: str
     rules: list
-    cells_copy: List[List[Cell]] = list(list())
+    cells_copy: List[List[tuple]] = list(list())
     iterationn: int = 0
 
     def __init__(self, name: str, cells: List[List[Cell]], neighbour: str, cell_states: list):
@@ -26,7 +26,7 @@ class Layer:
         for x in range(self.size):
             self.cells_copy.append(list())
             for y in range(self.size):
-                self.cells_copy[x].append(deepcopy(self.cells[x][y]))
+                self.cells_copy[x].append((deepcopy(self.cells[x][y].current_state),deepcopy(self.cells[x][y].value)))
 
     # Function that adds neighbourhoods for all cells
     def add_neighbourhood(self, neighbour: str):
@@ -41,10 +41,8 @@ class Layer:
 
     # Iteration step
     def step(self):
-        print(self.iterationn)
         self.calculate_state()
         self.iteration()
-        self.iterationn += 1
 
     # Function that clears one cell
     def clear(self, x: int, y: int):
@@ -54,6 +52,14 @@ class Layer:
         for x in range(self.size):
             for y in range(self.size):
                 self.clear(x, y)
+
+    def reset(self):
+        for x in range(self.size):
+            for y in range(self.size):
+                self.cells[x][y].current_state = self.cells_copy[x][y][0]
+                self.cells[x][y].next_state = 0
+                self.cells[x][y].value = self.cells_copy[x][y][1]
+        self.iterationn = 0
 
     # Function that calculates state for each cell
     def calculate_state(self):
@@ -72,6 +78,7 @@ class Layer:
             for y in range(self.size):
                 self.cells[x][y].current_state = self.cells[x][y].next_state
                 self.cells[x][y].next_state = 0
+        self.iterationn += 1
 
     '''
     neighbourhood indexes
