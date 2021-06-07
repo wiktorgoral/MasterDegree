@@ -106,12 +106,14 @@ class ViewBoard:
         button_reset_all.bind("<Button-1>", self.click_reset_all)
         button_iterate.bind("<Button-1>", self.click_iterate)
 
+    # Function that calls iteration on model every 1 sec
     def mainloop(self):
         start = time.time()
         self.controller.iteration()
         if self.start:
             self.window.after(1000 - int(time.time() - start), self.mainloop)
 
+    # Function that calls iteration on current layer every 1 sec
     def iterate(self):
         start = time.time()
         self.current_layer.step()
@@ -139,6 +141,7 @@ class ViewBoard:
             pixel_position[0] + self.tile_size, pixel_position[1] + self.tile_size,
             fill=color, tag=tag)
 
+    # Function draws layer
     def draw_layer(self, tag: str):
         for x in range(self.size):
             for y in range(self.size):
@@ -157,6 +160,7 @@ class ViewBoard:
         grid_position = np.array(grid_position, dtype=int)
         return self.tile_size * grid_position
 
+    # Function that changes currently displayed layer
     def change_layer(self, layer: int):
         if self.current_layer_index == self.layers_count:
             self.canvas.delete("new")
@@ -171,6 +175,7 @@ class ViewBoard:
         self.canvas.delete("new")
         self.draw_layer("new")
 
+    # Function that changes currently displayed cell types
     def change_types(self, types: List[tuple]):
         self.listbox_cell.delete(0, len(self.cell_types))
         self.cell_types = types
@@ -208,16 +213,18 @@ class ViewBoard:
         self.current_type = 0
         self.change_layer(self.current_layer_index)
 
-    # On-Click function that resets current layer
+    # On-Click function that clears current layer
     def click_clear(self, event):
         self.start = False
         self.controller.clear(self.current_layer_index)
         self.change_layer(self.current_layer_index)
 
+    # On-Click function that resets current layer
     def click_reset(self, event):
         self.current_layer.reset()
         self.change_layer(self.current_layer_index)
 
+    # On-Click function that resets all layers
     def click_reset_all(self, event):
         self.controller.reset_all()
         self.change_layer(self.current_layer_index)
@@ -231,6 +238,7 @@ class ViewBoard:
     def click_stop(self, event):
         self.start = False
 
+    # On-Click function that iterates current layer
     def click_iterate(self, event):
         self.start = True
         self.iterate()

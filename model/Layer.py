@@ -44,15 +44,13 @@ class Layer:
         self.calculate_state()
         self.iteration()
 
-    # Function that clears one cell
-    def clear(self, x: int, y: int):
-        self.cells[x][y].clear()
-
+    # Clear all cells
     def clear_all(self):
         for x in range(self.size):
             for y in range(self.size):
-                self.clear(x, y)
+                self.cells[x][y].clear()
 
+    # Reset cells to state at iteration 0
     def reset(self):
         for x in range(self.size):
             for y in range(self.size):
@@ -67,6 +65,7 @@ class Layer:
             for y in range(self.size):
                 self.cells[x][y].calculate_state()
 
+    # Function that calculates state based on slide window rules
     def calculate_state_with_rules(self):
         for x in range(self.size):
             for y in range(self.size):

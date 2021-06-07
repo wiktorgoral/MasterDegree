@@ -59,7 +59,7 @@ def read_layer_txt(name: str):
     elif name == "Langton ant":
         example = name
         name = "Examples/Langton Ant/text/layer1.txt"
-    elif name == "wire world":
+    elif name == "wireworld":
         example = name
         name = "Examples/Wire World/text/layer1.txt"
 
@@ -121,7 +121,7 @@ def read_layer_excel(name: str):
     elif name == "Langton ant":
         example = name
         name = "Examples/Langton Ant/excel/example.xlsx"
-    elif name == "wire world":
+    elif name == "wireworld":
         example = name
         name = "Examples/Wire World/excel/example.xlsx"
 

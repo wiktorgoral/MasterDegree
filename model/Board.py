@@ -24,8 +24,10 @@ class ModelBoard:
             self.iteration = self.unaware_strategy
         elif strategy == "player strategy":
             self.iteration = self.player_strategy
-        elif strategy == "all layers":
+        elif strategy == "ranking layers":
             self.iteration = self.all_layers_strategy
+        elif strategy == "custom":
+            return
         else: raise NameError("No strategy")
 
     # Strategy in which all layers iterate and after resolve conflicts

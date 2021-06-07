@@ -36,10 +36,12 @@ class ViewController:
     def clear(self, i: int):
         self.board.layers[i].clear_all()
 
+    # Reset all cells in all layers to iteration 0
     def reset_all(self):
         for layer in self.board.layers:
             layer.reset()
 
+    # Iterate board and draw changes
     def iteration(self):
         self.board.iteration()
         self.view.change_layer(self.view.current_layer_index)
