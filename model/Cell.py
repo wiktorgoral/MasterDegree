@@ -177,4 +177,7 @@ class Cell:
                     if i + 0.5 == len(result) / 2:
                         self.next_state = result[i]
                     else:
-                        self.neighbours[i].next_state = result[i]
+                        if i + 0.5 < len(result) / 2:
+                            self.neighbours[i].next_state = result[i]
+                        else:
+                            self.neighbours[i-1].next_state = result[i]

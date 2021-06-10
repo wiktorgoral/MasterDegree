@@ -67,8 +67,8 @@ class Layer:
 
     # Function that calculates state based on slide window rules
     def calculate_state_with_rules(self):
-        for x in range(self.size):
-            for y in range(self.size):
+        for x in range(1, self.size-1):
+            for y in range(1, self.size-1):
                 self.cells[x][y].calculate_state(self.rules)
 
     # Function that changes state for each cell

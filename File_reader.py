@@ -40,8 +40,8 @@ def read_von_neumann_excel(sheet, start_row, start_column, cells_states):
 
 def read_moore_excel(sheet, start_row, start_column, cells_states):
     rule = []
-    for x in range(4):
-        for y in range(4):
+    for x in range(3):
+        for y in range(3):
             color = sheet.cell(start_row + x, start_column + y).fill.start_color.value
             color = "#" + color[2:]
             typee = 0
@@ -182,7 +182,7 @@ def read_layer_excel(name: str):
                 match = read_von_neumann_excel(sheet, size + 7 + i * 4, 0, cells_states)
                 result = read_von_neumann_excel(sheet, size + 7 + i * 4, 5, cells_states)
             elif neighbourhood == "moore":
-                match = read_moore_excel(sheet, size + 7 + i * 4, 0, cells_states)
+                match = read_moore_excel(sheet, size + 7 + i * 4, 1, cells_states)
                 result = read_moore_excel(sheet, size + 7 + i * 4, 5, cells_states)
             rule = (match, result)
             rules.append(rule)
