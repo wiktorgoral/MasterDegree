@@ -33,7 +33,7 @@ class Cell:
     # Transition function
     # You can implement your own transition function here
     def calculate_state(self):
-        return 1
+        return
 
     # Function that adds neighbour
     def neighbours_add(self, cell):
@@ -174,6 +174,9 @@ class Cell:
                 if match[i] != window[i]: flag = False
             if flag:
                 for i in range(len(result)):
+                    # Hack to make both neighbourhoods work
+                    # This is due window having 9 elements and neighbourhood having 8 elements
+                    # Middle element of window has to equal current cell state
                     if i + 0.5 == len(result) / 2:
                         self.next_state = result[i]
                     else:

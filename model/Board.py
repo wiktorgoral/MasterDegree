@@ -7,17 +7,21 @@ from model.Layer import Layer
 class ModelBoard:
     layers_count: int = 0
     layers: List[Layer] = []
-    layer_size: int = 0
+    layer_height: int = 0
+    layer_width: int = 0
     layer_ranking: List[int] = []
 
     def __init__(self, layers: List[Layer], strategy: str):
-        size = layers[0].size
+        height = layers[0].height
+        width = layers[0].width
         for layer in layers:
-            if layer.size != size:
+            if layer.height != height or layer.width != width:
                 raise Exception("Layers are not same size")
         self.layers_count = len(layers)
-        self.layer_size = size
+        self.layer_height = height
+        self.layer_width = width
         self.layers = layers
+        self.layer_ranking = [i for i in range(self.layers_count)]
 
         # define layer competition strategy
         if strategy == "unaware strategy":
@@ -30,19 +34,18 @@ class ModelBoard:
             return
         else: raise NameError("No strategy")
 
-    # Strategy in which all layers iterate and after resolve conflicts
+    # Strategy in which all layers iterate and then conflicts are resolved based on ranking
     def all_layers_strategy(self):
         for layer in self.layers:
             layer.step()
             self.resolve_conflicts(self.layer_ranking)
 
-    # Strategy in which all layers iterate and conflicts are not resolved
+    # Strategy in which all layers iterate simultaneously and conflicts are not resolved
     def unaware_strategy(self):
-
         for layer in self.layers:
             layer.step()
 
-    # Strategy in which layers take turns
+    # Strategy in which each layer iterates and then resolves conflicts as first in ranking
     def player_strategy(self):
         for i in range(self.layers_count):
             self.layers[i].step()
@@ -56,17 +59,17 @@ class ModelBoard:
     # Function that calculates states of all layers
     # You can implement your own iteration here
     def iteration(self):
-        return 1
+        return None
 
     # Function that checks if cells of coordinates [x y] in all layers are occupied
-    def occupied(self, x: int, y: int):
+    def occupied(self, x: int, y: int) -> bool:
         occupied = False
         for layer in self.layers:
-            if layer.cells[x][y].current_state == 0:
+            if layer.cells[y][x].current_state == 0:
                 continue
-            elif layer.cells[x][y].current_state != 0 and occupied is False:
+            elif layer.cells[y][x].current_state != 0 and occupied is False:
                 occupied = True
-            elif layer.cells[x][y].current_state != 0 and occupied is True:
+            elif layer.cells[y][x].current_state != 0 and occupied is True:
                 return True
         return False
 
@@ -74,7 +77,7 @@ class ModelBoard:
     def conflict(self, x: int, y: int, ranking: List[int]):
         occupied_layers = []
         for i in range(len(self.layers)):
-            if self.layers[i].cells[x][y].current_state != 0: occupied_layers.append(i)
+            if self.layers[i].cells[y][x].current_state != 0: occupied_layers.append(i)
 
         winner = 0
         for i in range(len(ranking)):
@@ -83,18 +86,18 @@ class ModelBoard:
 
         for i in range(len(self.layers)):
             if i == winner: continue
-            self.layers[i].cells[x][y].current_state = 0
+            self.layers[i].cells[y][x].current_state = 0
 
     # Function that finds conflicts in all layers
     def resolve_conflicts(self, ranking: List[int]):
-        for x in range(self.layer_size):
-            for y in range(self.layer_size):
+        for y in range(self.layer_height):
+            for x in range(self.layer_width):
                 if self.occupied(x, y):
                     self.conflict(x, y, ranking)
 
     # Function that adds layer
     def add_layer(self, layer: Layer):
-        if layer.size != self.layer_size:
+        if layer.height != self.layer_height or layer.width != self.layer_width:
             raise Exception("Layers not same size")
         else:
             self.layers.append(layer)

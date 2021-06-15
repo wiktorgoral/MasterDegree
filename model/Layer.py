@@ -7,7 +7,8 @@ from model.Cell import Cell
 
 class Layer:
     name: str
-    size: int
+    height: int
+    width: int
     cells: List[List[Cell]]
     # Array of tuples (state's name, state's color)
     cells_states: List[Tuple[str, str]] = []
@@ -18,15 +19,16 @@ class Layer:
 
     def __init__(self, name: str, cells: List[List[Cell]], neighbour: str, cell_states: list):
         self.name = name
-        self.size = len(cells)
+        self.height = len(cells)
+        self.width = len(cells[0])
         self.cells = cells
         self.cells_states = cell_states
         self.neighbourhood = neighbour
         self.add_neighbourhood(neighbour)
-        for x in range(self.size):
+        for y in range(self.height):
             self.cells_copy.append(list())
-            for y in range(self.size):
-                self.cells_copy[x].append((deepcopy(self.cells[x][y].current_state),deepcopy(self.cells[x][y].value)))
+            for x in range(self.width):
+                self.cells_copy[y].append((deepcopy(self.cells[y][x].current_state), deepcopy(self.cells[y][x].value)))
 
     # Function that adds neighbourhoods for all cells
     def add_neighbourhood(self, neighbour: str):
@@ -46,39 +48,40 @@ class Layer:
 
     # Clear all cells
     def clear_all(self):
-        for x in range(self.size):
-            for y in range(self.size):
-                self.cells[x][y].clear()
+        for y in range(self.height):
+            for x in range(self.width):
+                self.cells[y][x].clear()
 
     # Reset cells to state at iteration 0
     def reset(self):
-        for x in range(self.size):
-            for y in range(self.size):
-                self.cells[x][y].current_state = self.cells_copy[x][y][0]
-                self.cells[x][y].next_state = 0
-                self.cells[x][y].value = self.cells_copy[x][y][1]
+        for y in range(self.height):
+            for x in range(self.width):
+                self.cells[y][x].current_state = self.cells_copy[y][x][0]
+                self.cells[y][x].next_state = 0
+                self.cells[y][x].value = self.cells_copy[y][x][1]
         self.iterationn = 0
 
     # Function that calculates state for each cell
     def calculate_state(self):
-        for x in range(self.size):
-            for y in range(self.size):
-                self.cells[x][y].calculate_state()
+        for y in range(self.height):
+            for x in range(self.width):
+                self.cells[y][x].calculate_state()
 
     # Function that calculates state based on slide window rules
     def calculate_state_with_rules(self):
-        for x in range(1, self.size-1):
-            for y in range(1, self.size-1):
-                self.cells[x][y].calculate_state(self.rules)
+        for y in range(1, self.height-1):
+            for x in range(1, self.width-1):
+                self.cells[y][x].calculate_state(self.rules)
 
     # Function that changes state for each cell
     def iteration(self):
-        for x in range(self.size):
-            for y in range(self.size):
-                self.cells[x][y].current_state = self.cells[x][y].next_state
-                self.cells[x][y].next_state = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                self.cells[y][x].current_state = self.cells[y][x].next_state
+                self.cells[y][x].next_state = 0
         self.iterationn += 1
 
+    # Functions that add appropriate neighbourhood to all cells
     '''
     neighbourhood indexes
     Moore:
@@ -88,14 +91,14 @@ class Layer:
     '''
 
     def moore(self):
-        for x in range(1, self.size - 1):
-            for y in range(1, self.size - 1):
+        for y in range(1, self.height - 1):
+            for x in range(1, self.width - 1):
                 neighbours = []
-                for xi in range(x - 1, x + 2):
-                    for yi in range(y - 1, y + 2):
+                for yi in range(y - 1, y + 2):
+                    for xi in range(x - 1, x + 2):
                         if xi == x and yi == y: continue
-                        neighbours.append(self.cells[xi][yi])
-                self.cells[x][y].neighbours = neighbours
+                        neighbours.append(self.cells[yi][xi])
+                self.cells[y][x].neighbours = neighbours
 
     '''
     Von Neumann:
@@ -105,31 +108,31 @@ class Layer:
     '''
 
     def von_neumann(self):
-        for x in range(1, self.size - 1):
-            for y in range(1, self.size - 1):
-                self.cells[x][y].neighbours_add(self.cells[x - 1][y])
-                self.cells[x][y].neighbours_add(self.cells[x][y + 1])
-                self.cells[x][y].neighbours_add(self.cells[x][y - 1])
-                self.cells[x][y].neighbours_add(self.cells[x + 1][y])
+        for y in range(1, self.height - 1):
+            for x in range(1, self.width - 1):
+                self.cells[y][x].neighbours_add(self.cells[y - 1][x])
+                self.cells[y][x].neighbours_add(self.cells[y][x + 1])
+                self.cells[y][x].neighbours_add(self.cells[y][x - 1])
+                self.cells[y][x].neighbours_add(self.cells[y + 1][x])
 
     # Save layer to txt file
     def to_file(self, path):
         file = open(os.path.join(path, self.name), "x")
         file.write(self.name + os.linesep)
-        file.write(str(self.size) + os.linesep)
+        file.write(str(self.height) + " " + str(self.width) + os.linesep)
         file.write(self.neighbourhood + os.linesep)
         file.write(os.linesep)
-        for x in range(self.size):
+        for y in range(self.height):
             line = ""
-            for y in range(self.size):
-                line += self.cells[x][y].current_state
+            for x in range(self.width):
+                line += self.cells[y][x].current_state
             file.write(line + os.linesep)
         file.write(os.linesep)
-        for x in range(1, len(self.cells_states)):
-            file.write(self.cells_states[x][0] + " " + self.cells_states[x][1] + os.linesep)
+        for i in range(1, len(self.cells_states)):
+            file.write(self.cells_states[i][0] + " " + self.cells_states[i][1] + os.linesep)
         file.write(os.linesep)
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.cells[x][y].current_state != 0:
-                    file.write(str(self.cells[x][y].value) + os.linesep)
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.cells[y][x].current_state != 0:
+                    file.write(str(self.cells[y][x].value) + os.linesep)
         file.close()

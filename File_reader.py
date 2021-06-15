@@ -1,14 +1,17 @@
 import os
-from typing import List
+from typing import List, Tuple
 
 from openpyxl import load_workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
 from model.Cell import Cell
 from model.Layer import Layer
 from model.Board import ModelBoard
 
 
-def read_von_neumann_excel(sheet, start_row, start_column, cells_states):
+# Function that reads Excel file Von Neumann's sliding window rule
+def read_von_neumann_excel(sheet: Worksheet, start_row: int, start_column: int,
+                           cells_states: List[Tuple[str, str]]) -> List[int]:
     zero_color = sheet.cell(start_row + 1, start_column).fill.start_color.value
     zero_color = "#" + zero_color[2:]
     zero_type = 0
@@ -38,7 +41,9 @@ def read_von_neumann_excel(sheet, start_row, start_column, cells_states):
     return rule
 
 
-def read_moore_excel(sheet, start_row, start_column, cells_states):
+# Function that reads Excel file Moore's sliding window rule
+def read_moore_excel(sheet: Worksheet, start_row: int, start_column: int,
+                     cells_states: List[Tuple[str, str]]) -> List[int]:
     rule = []
     for x in range(3):
         for y in range(3):
@@ -51,7 +56,8 @@ def read_moore_excel(sheet, start_row, start_column, cells_states):
     return rule
 
 
-def read_layer_txt(name: str):
+# Function that reads Text file and returns layer object
+def read_layer_txt(name: str) -> Layer:
     example = None
     if name == "game of life":
         example = name
@@ -65,25 +71,27 @@ def read_layer_txt(name: str):
 
     with open(name) as reader:
 
-        name = reader.readline().rstrip('\n')
-        size = int(reader.readline().rstrip('\n'))
-        cells = [[0 for _ in range(size)] for _ in range(size)]
+        name = reader.readline().strip()
+        size = reader.readline().strip().split()
+        height = int(size[1])
+        width = int(size[0])
+        cells = [[0 for _ in range(width)] for _ in range(height)]
         cells_states = []
-        neighbourhood = reader.readline().rstrip('\n')
+        neighbourhood = reader.readline().strip()
 
-        # read cells
+        # read grid
         reader.readline()
-        for y in range(size):
-            line = reader.readline().rstrip('\n')
-            for x in range(len(line)):
+        for y in range(height):
+            line = reader.readline().strip()
+            for x in range(width):
                 cells[y][x] = int(line[x])
 
         # read cells states
         reader.readline()
         line = reader.readline()
         cells_states.append(("nothing", "white"))
-        while line != '\n':
-            line = line.rstrip('\n').split()
+        while line != "":
+            line = line.strip().split()
             cells_states.append((line[0], line[1]))
             line = reader.readline()
 
@@ -91,25 +99,33 @@ def read_layer_txt(name: str):
         line = reader.readline()
         values = list()
         while line != "":
-            line = line.rstrip('\n')
+            line = line.strip()
             values.append(float(line))
             line = reader.readline()
 
         # Create layer with all parameters
-        cells_class: List[List[Cell]] = list(list())
+        cells_class: List = list()
         i = 0
-        for x in range(size):
+        for y in range(height):
             cells_class.append(list())
-            for y in range(size):
-                cells_class[x].append(Cell(cells[x][y], value=values[i], example=example))
-                if cells[x][y] != 0:
-                    i += 1
+            for x in range(width):
+                # Check if values have been declared
+                if len(values) == 0:
+                    cells_class[y].append(Cell(cells[y][x], example=example))
+                else:
+                    # Check if current cell had value declared
+                    if cells[y][x] != 0:
+                        cells_class[y].append(Cell(cells[y][x], value=values[i], example=example))
+                        i += 1
+                    else:
+                        cells_class[y].append(Cell(cells[y][x], example=example))
 
         layer = Layer(name, cells_class, neighbourhood, cells_states)
         return layer
 
 
-def read_layer_excel(name: str):
+# Function that reads Excel file and returns layer list
+def read_layer_excel(name: str) -> List[Layer]:
     example = None
 
     if name == "forest fire":
@@ -133,14 +149,15 @@ def read_layer_excel(name: str):
         sheet = workbook.get_sheet_by_name(sheet_name)
 
         name = sheet_name
-        size = int(sheet["A1"].value)
+        height = int(sheet["B1"].value)
+        width = int(sheet["A1"].value)
         neighbourhood = sheet["A2"].value
         cells_states = []
-        cells = [[tuple() for _ in range(size)] for _ in range(size)]
+        cells = [[tuple() for _ in range(width)] for _ in range(height)]
 
         # read cell types
         cells_states.append(("nothing", "white"))
-        for row in range(size + 5, sheet.max_row + 1):
+        for row in range(height + 5, sheet.max_row + 1):
             if sheet.cell(row, 1).value is None: break
 
             type_name = str(sheet.cell(row, 1).value)
@@ -158,32 +175,32 @@ def read_layer_excel(name: str):
                 cell_value = float(sheet.cell(row, col).value)
                 color_hex = sheet.cell(row, col).fill.start_color.value
                 color_hex = "#" + color_hex[2:]
-                cells[col - 1][row - 4] = (cell_value, color_hex)
+                cells[row - 4][col - 1] = (cell_value, color_hex)
 
         # Create cell objects
         cells_class: List[List[Cell]] = list(list())
-        for x in range(size):
+        for y in range(height):
             cells_class.append(list())
-            for y in range(size):
-                cells_class[x].append(Cell(0, value=cells[x][y][0], example=example))
+            for x in range(width):
+                cells_class[y].append(Cell(0, value=cells[y][x][0], example=example))
                 for typee in range(len(cells_states)):
-                    if cells_states[typee][1] == cells[x][y][1]:
-                        cells_class[x][y].current_state = typee
+                    if cells_states[typee][1] == cells[y][x][1]:
+                        cells_class[y][x].current_state = typee
 
         layer = Layer(name, cells_class, neighbourhood, cells_states)
         layers.append(layer)
 
         # Reading sliding window rules - optional
         rules = []
-        rule_size = int((sheet.max_row - (size + 3 + len(cells_states))) / 4)
+        rule_size = int((sheet.max_row - (height + 3 + len(cells_states))) / 4)
         for i in range(rule_size):
             match, result = [], []
             if neighbourhood == "von_neumann":
-                match = read_von_neumann_excel(sheet, size + 7 + i * 4, 0, cells_states)
-                result = read_von_neumann_excel(sheet, size + 7 + i * 4, 5, cells_states)
+                match = read_von_neumann_excel(sheet, height + 7 + i * 4, 0, cells_states)
+                result = read_von_neumann_excel(sheet, height + 7 + i * 4, 5, cells_states)
             elif neighbourhood == "moore":
-                match = read_moore_excel(sheet, size + 7 + i * 4, 1, cells_states)
-                result = read_moore_excel(sheet, size + 7 + i * 4, 5, cells_states)
+                match = read_moore_excel(sheet, height + 7 + i * 4, 1, cells_states)
+                result = read_moore_excel(sheet, height + 7 + i * 4, 5, cells_states)
             rule = (match, result)
             rules.append(rule)
         layer.rules = rules
@@ -191,7 +208,8 @@ def read_layer_excel(name: str):
     return layers
 
 
-def read_board(folder: str, strategy: str):
+# Function that reads Board from either excel file or folder with text files
+def read_board(folder: str, strategy: str) -> ModelBoard:
     layers = list()
     number_of_files = next(os.walk(folder))[2]
     for file in number_of_files:

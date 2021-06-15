@@ -9,7 +9,8 @@ from model.Layer import Layer
 
 class ViewBoard:
     controller: ViewController = None
-    size: int = 0
+    height: int = 0
+    width: int = 0
     layers_count: int = 0
     tile_size: int = 0
     current_layer: Layer = None
@@ -17,12 +18,12 @@ class ViewBoard:
     current_layer_index: int = 0
     start: bool = False
 
-    def __init__(self, controller, layers_names: list, layer: Layer, size: int, tile_size: int = 10):
+    def __init__(self, controller, layers_names: list, layer: Layer, tile_size: int = 10):
 
         self.controller = controller
-        self.size = size
+        self.height = layer.height
+        self.width = layer.width
         self.tile_size = tile_size
-        size_pixel = self.size * self.tile_size
 
         self.current_layer_index = 0
         self.current_layer = layer
@@ -30,17 +31,17 @@ class ViewBoard:
 
         # Declaring window
         self.window = Tk()
-        self.window.geometry(str(size_pixel + 140) + "x" + str(size_pixel))
+        self.window.geometry(str(self.width * tile_size + 140) + "x" + str(self.height * tile_size))
         self.window.resizable(width=False, height=False)
         self.window.title("Board")
 
         # Splitting window into two columns for tooltip and canvas
-        self.window.rowconfigure(0, minsize=size_pixel, weight=1)
-        self.window.columnconfigure(1, minsize=size_pixel, weight=1)
+        self.window.rowconfigure(0, minsize=self.height, weight=1)
+        self.window.columnconfigure(1, minsize=self.width, weight=1)
 
         # Declaring canvas and tooltip
-        self.canvas = Canvas(self.window, width=size_pixel, height=size_pixel)
-        self.tooltip = Frame(self.window, height=size_pixel)
+        self.canvas = Canvas(self.window, width=self.width * tile_size - 140, height=self.height)
+        self.tooltip = Frame(self.window, height=self.height)
 
         # Laying out canvas and tooltip
         self.tooltip.grid(row=0, column=0, sticky="ns")
@@ -48,9 +49,9 @@ class ViewBoard:
 
         # Initializing canvas
         self.draw_netting()
-        for x in range(self.size):
-            for y in range(self.size):
-                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], "new")
+        for y in range(self.height):
+            for x in range(self.width):
+                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[y][x].current_state][1], "new")
 
         # Declaring layer list selection
         listbox_layer_label = Label(self.tooltip, text="Select layer:")
@@ -125,13 +126,15 @@ class ViewBoard:
 
     # Function that creates netting for canvas
     def draw_netting(self):
-        for i in range(self.size - 1):
-            self.canvas.create_line((i + 1) * self.tile_size, 0,
-                                    (i + 1) * self.tile_size, self.size * self.tile_size)
+        # vertical lines
+        for i in range(self.width):
+            self.canvas.create_line(i * self.tile_size, 0,
+                                    i * self.tile_size, self.height * self.tile_size)
 
-        for i in range(self.size - 1):
-            self.canvas.create_line(0, (i + 1) * self.tile_size,
-                                    self.size * self.tile_size, (i + 1) * self.tile_size)
+        # horizontal lines
+        for i in range(self.height):
+            self.canvas.create_line(0, i * self.tile_size,
+                                    self.width * self.tile_size, i * self.tile_size)
 
     # Function that colors appropriate cell in grid
     def fill_cell(self, grid_position, color: str, tag: str):
@@ -143,10 +146,10 @@ class ViewBoard:
 
     # Function draws layer
     def draw_layer(self, tag: str):
-        for x in range(self.size):
-            for y in range(self.size):
-                if self.current_layer.cells[x][y].current_state == 0: continue
-                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[x][y].current_state][1], tag)
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.current_layer.cells[y][x].current_state == 0: continue
+                self.fill_cell([x, y], self.cell_types[self.current_layer.cells[y][x].current_state][1], tag)
 
     '''Logic Functions'''
 
@@ -197,7 +200,7 @@ class ViewBoard:
 
         # Fill rectangle with appropriate color and change cell's board status
         self.fill_cell(grid_position, self.cell_types[self.current_type][1], "new")
-        self.current_layer.cells[grid_position[0]][grid_position[1]].current_state = self.current_type
+        self.current_layer.cells[grid_position[1]][grid_position[0]].current_state = self.current_type
 
     # On-Click function that tracks currently selected cell type
     def click_type(self, event):
